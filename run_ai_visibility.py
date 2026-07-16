@@ -30,7 +30,7 @@ PROMPTS_FILE = Path(__file__).parent / "prompts.yaml"
 # Model versions (bump when new models ship — history preserved in run rows)
 OPENAI_MODEL   = "gpt-4o"                # switch to gpt-5 once stable
 CLAUDE_MODEL   = "claude-opus-4-7"
-GEMINI_MODEL   = "gemini-2.0-flash"
+GEMINI_MODEL   = "gemini-3-flash-preview"
 SCORER_MODEL   = "claude-opus-4-7"       # Claude scores all responses
 
 BRAND_NAMES   = ["barker and stonehouse", "barker & stonehouse", "barker&stonehouse", "b&s"]
