@@ -1,0 +1,35 @@
+name: AI Visibility weekly run
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Every Monday 06:00 UTC
+  workflow_dispatch: {}    # allow manual runs from the Actions tab
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write        # for Google auth via WIF (optional; simpler is a key JSON secret)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Write BQ service account key
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > /tmp/sa.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json" >> $GITHUB_ENV
+
+      - name: Run
+        env:
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
+        run: python run_ai_visibility.py
