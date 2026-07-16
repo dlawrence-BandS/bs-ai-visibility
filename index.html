@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>B&S AI Visibility</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+<style>
+:root{
+  --navy:#1f332a; --navy-d:#15241d; --bg:#f4f1ea; --card:#fffdf8; --ink:#27231c; --mut:#8b8272;
+  --line:#e7e0d2; --brass:#a8814f; --brass-d:#8f6c3f;
+  --m-clicks:#a8814f; --m-impr:#3d5747; --m-ctr:#5b7085; --m-pos:#b45f42;
+  --up:#3e7048; --dn:#a13d2d; --up-bg:#eaf0e4; --dn-bg:#f8e9e2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:13px}
+
+/* ── Header ─────────────────────────────── */
+header{background:var(--navy);color:#fff;padding:22px 30px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:3px solid var(--brass)}
+header h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;letter-spacing:.4px}
+header .sub{font-size:11px;opacity:.72;text-transform:uppercase;letter-spacing:1.6px;margin-top:2px}
+header .meta{margin-left:auto;display:flex;gap:16px;align-items:center;font-size:12px}
+header .meta .pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:5px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.3px}
+#key-btn{background:transparent;border:1px solid var(--brass);color:#e8d9c2;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:.3px}
+#key-btn:hover{background:var(--brass);color:#fff}
+
+/* ── Controls ───────────────────────────── */
+.controls{background:#fff;border-bottom:1px solid var(--line);padding:12px 28px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;position:sticky;top:0;z-index:40}
+.ctl{display:flex;flex-direction:column;gap:4px}
+.ctl label{font-size:10.5px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.6px}
+.ctl select,.ctl input{border:1px solid #d4ccbb;border-radius:8px;padding:7px 10px;background:#fff;min-width:130px}
+.ctl input[type=date]{min-width:140px}
+#custom-dates{display:none;gap:14px}
+#custom-dates.show{display:flex}
+.chk{display:flex;align-items:center;gap:7px;padding-bottom:8px;font-size:13px;color:var(--ink)}
+.chk input{min-width:0}
+#run-btn{background:var(--brass);color:#fff;border:none;border-radius:8px;padding:9px 28px;font-weight:600;font-size:13.5px;letter-spacing:.4px}
+#run-btn:hover{background:var(--brass-d)}
+#run-btn:disabled{opacity:.55;cursor:wait}
+#status{font-size:12px;color:var(--mut);padding-bottom:9px;min-width:150px}
+#status.err{color:var(--dn);font-weight:600}
+
+/* ── Layout ─────────────────────────────── */
+main{max-width:1360px;margin:0 auto;padding:22px 28px 60px}
+.banner{background:#fff8e6;border:1px solid #f0dfa8;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;line-height:1.55;display:none}
+.banner.show{display:block}
+.banner.error{background:var(--dn-bg);border-color:#f0b9b6}
+
+/* KPI cards */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-bottom:16px}
+.kpi{background:var(--card);border-radius:12px;padding:16px 18px 14px;border:1px solid var(--line);border-top:4px solid var(--kc,#999);cursor:pointer;transition:box-shadow .15s, transform .15s;user-select:none}
+.kpi:hover{box-shadow:0 4px 14px rgba(20,35,70,.08)}
+.kpi.off{opacity:.45;border-top-color:#c8cdd8}
+.kpi .kl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.kpi .kl .dot{width:9px;height:9px;border-radius:50%;background:var(--kc)}
+.kpi .kv{font-size:29px;font-weight:600;margin:6px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.kpi .kd{font-size:12px;color:var(--mut)}
+.chg{display:inline-flex;align-items:center;gap:3px;font-weight:600;font-size:12px;padding:2px 8px;border-radius:12px;font-variant-numeric:tabular-nums}
+.chg.up{color:var(--up);background:var(--up-bg)}
+.chg.dn{color:var(--dn);background:var(--dn-bg)}
+.chg.fl{color:var(--mut);background:#eeeade}
+
+/* Cards & tabs */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.card h3{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;margin-bottom:2px;letter-spacing:.2px}
+.card .hint{font-size:12px;color:var(--mut);margin-bottom:12px}
+.card-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.card-head .tools{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tools input[type=search]{border:1px solid #d4ccbb;border-radius:8px;padding:6px 10px;width:210px}
+.csv-btn{background:#fff;border:1px solid #d4ccbb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy)}
+.csv-btn:hover{background:#f2ede1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+
+nav.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:6px 0 18px;flex-wrap:wrap}
+nav.tabs button{background:none;border:none;padding:10px 18px;font-size:13.5px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-2px}
+nav.tabs button.on{color:var(--navy);border-bottom-color:var(--brass)}
+.panel{display:none}
+.panel.on{display:block}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);text-align:right;padding:8px 10px;border-bottom:2px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+th.txt, td.txt{text-align:left}
+th.sorted{color:var(--navy)}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f6;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.txt{white-space:normal;word-break:break-word;max-width:440px}
+tr:hover td{background:#faf7ef}
+td .qlink{color:var(--ink);text-decoration:none}
+td .qlink:hover{color:var(--m-clicks);text-decoration:underline}
+.posb{display:inline-block;min-width:44px;text-align:center;padding:2px 7px;border-radius:10px;font-weight:600;font-size:12px}
+.posb.p1{background:#e2f0e8;color:#0d7a3f}.posb.p2{background:#fdf3e3;color:#b06000}.posb.p3{background:#fdeae4;color:#c04b1d}.posb.p4{background:#eeeade;color:#6b7280}
+.mut{color:var(--mut)}
+.empty{padding:26px;text-align:center;color:var(--mut);font-size:13px}
+canvas{max-width:100%}
+.chart-h{position:relative;height:330px}
+.chart-s{position:relative;height:280px}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,50,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:640px;width:100%;padding:26px 28px}
+.modal h2{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px}
+.modal textarea{width:100%;height:96px;border:1px solid #d4ccbb;border-radius:10px;padding:12px;font-family:ui-monospace,monospace;font-size:11.5px;resize:vertical}
+.modal input[type=file]{width:100%;border:1px dashed #aab4c8;border-radius:10px;padding:14px 12px;background:#faf7ef;font-size:12.5px;cursor:pointer}
+.modal input[type=file]::file-selector-button{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-weight:600;font-size:12px;margin-right:12px;cursor:pointer}
+.modal input[type=file].ok{border-color:#0d7a3f;background:#f0f9f3}
+.modal .row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.modal .row .sp{margin-left:auto}
+.btn{border-radius:8px;padding:9px 20px;font-weight:600;font-size:13px;border:1px solid #d4ccbb;background:#fff}
+.btn.prime{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.danger{color:var(--dn);border-color:#f0b9b6}
+#key-state{font-size:12px;color:var(--mut)}
+.modal .field{margin-top:14px}
+.modal .field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:5px}
+.modal .field input{width:100%;border:1px solid #d4ccbb;border-radius:8px;padding:8px 10px}
+
+footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
+.mini-btn{background:#fff;border:1px solid #d4ccbb;border-radius:8px;padding:0 10px;font-size:13px;color:var(--navy)}
+.mini-btn:hover{background:#f2ede1}
+.qdrill{cursor:pointer;border-bottom:1px dashed #b9c4d8}
+.qdrill:hover{color:var(--m-clicks);border-bottom-color:var(--m-clicks)}
+a.ext{text-decoration:none;color:#9aa3b5;font-size:11px;margin-left:4px}
+a.ext:hover{color:var(--m-clicks)}
+
+/* Drill drawer */
+#drawer-bg{position:fixed;inset:0;background:rgba(15,25,50,.4);display:none;z-index:80}
+#drawer-bg.show{display:block}
+#drawer{position:fixed;top:0;right:-580px;width:560px;max-width:96vw;height:100vh;background:#fff;z-index:90;box-shadow:-8px 0 30px rgba(15,25,50,.2);transition:right .25s ease;display:flex;flex-direction:column}
+#drawer.show{right:0}
+.drawer-head{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:12px}
+.drawer-head .dr-type{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)}
+.drawer-head h2{font-size:16px;font-weight:700;word-break:break-word;margin-top:2px}
+.drawer-head button{margin-left:auto;background:none;border:none;font-size:17px;color:var(--mut);flex:none}
+.dr-body{padding:16px 22px;overflow-y:auto}
+.dr-links{font-size:12.5px;margin-bottom:12px}
+.dr-loading{padding:30px;text-align:center;color:var(--mut)}
+
+/* Ask AI */
+#ai-fab{position:fixed;bottom:22px;right:22px;z-index:70;background:var(--navy);color:#fff;border:1px solid var(--brass);border-radius:26px;padding:13px 22px;font-weight:600;font-size:13.5px;box-shadow:0 6px 18px rgba(35,30,20,.3)}
+#ai-fab:hover{background:var(--navy-d)}
+#ai-panel{position:fixed;bottom:22px;right:22px;width:420px;max-width:94vw;height:560px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(15,25,50,.3);z-index:75;display:none;flex-direction:column;overflow:hidden}
+#ai-panel.show{display:flex}
+.ai-head{background:var(--navy);color:#fff;padding:13px 16px;font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:10px}
+.ai-head button{background:none;border:none;color:#fff;opacity:.8;font-size:12px}
+.ai-head button:hover{opacity:1}
+.ai-head .x{margin-left:auto;font-size:15px}
+.ai-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{max-width:88%;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.ai-msg.user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
+.ai-msg.bot{align-self:flex-start;background:#f2ede1;border-bottom-left-radius:4px}
+.ai-msg.think{align-self:flex-start;color:var(--mut);font-style:italic;padding:4px 13px}
+.ai-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.ai-input textarea{flex:1;border:1px solid #d4ccbb;border-radius:10px;padding:9px 11px;resize:none;font-size:13px}
+.ai-input button{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:0 18px;font-weight:600}
+.ai-input button:disabled{opacity:.5}
+</style>
+<style>
+/* Extra styles specific to this dashboard */
+.tabs-panel{display:none} .tabs-panel.on{display:block}
+.prompt-row{cursor:pointer}
+.prompt-row:hover td{background:#faf7ef}
+.sent-pos{color:var(--up);font-weight:600}
+.sent-neg{color:var(--dn);font-weight:600}
+.sent-neu{color:var(--mut)}
+.sent-mix{color:#8f6c3f;font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.2px}
+.badge.ok{background:#e6efe2;color:#3e7048}
+.badge.miss{background:#eeeade;color:#8b8272}
+.claim-flag{background:#f8e9e2;border-left:3px solid var(--dn);padding:6px 10px;margin:4px 0;font-size:12.5px}
+.model-col{border-left:1px solid var(--line);padding:14px 16px}
+.model-col:first-child{border-left:none}
+.model-col h4{font-family:'Cormorant Garamond',serif;font-size:17px;margin-bottom:8px}
+.response-box{background:#faf7ef;border-radius:8px;padding:12px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;max-height:400px;overflow-y:auto}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:1000px){.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>AI Visibility</h1>
+    <div class="sub">How ChatGPT, Claude &amp; Gemini answer questions about Barker &amp; Stonehouse</div>
+  </div>
+  <div class="meta">
+    <span class="pill" id="fresh-pill">Latest run: &ndash;</span>
+    <span class="pill" id="mention-pill">Mention rate: &ndash;</span>
+    <button id="key-btn">&#9881; Connection</button>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="ctl">
+    <label>Look back</label>
+    <select id="preset">
+      <option value="latest" selected>Latest run only</option>
+      <option value="4">Last 4 runs</option>
+      <option value="12">Last 12 runs</option>
+      <option value="26">Last 26 runs</option>
+    </select>
+  </div>
+  <div class="ctl">
+    <label>Model</label>
+    <select id="model-sel">
+      <option value="all" selected>All models</option>
+      <option value="chatgpt">ChatGPT</option>
+      <option value="claude">Claude</option>
+      <option value="gemini">Gemini</option>
+    </select>
+  </div>
+  <div class="ctl">
+    <label>Category</label>
+    <select id="cat-sel">
+      <option value="all" selected>All categories</option>
+      <option value="discovery">Discovery</option>
+      <option value="brand">Brand-specific</option>
+      <option value="competitor">Competitor</option>
+      <option value="product">Product</option>
+      <option value="trust">Trust</option>
+    </select>
+  </div>
+  <button id="run-btn">Run</button>
+  <div id="status"></div>
+</div>
+
+<main>
+  <div class="banner" id="banner"></div>
+
+  <nav class="tabs">
+    <button data-tab="overview" class="on">Overview</button>
+    <button data-tab="prompts">Prompts</button>
+    <button data-tab="competitors">Competitors</button>
+    <button data-tab="claims">Claims log</button>
+  </nav>
+
+  <section class="tabs-panel on" id="pnl-overview">
+    <div class="kpis">
+      <div class="kpi" style="--kc:var(--m-clicks)"><div class="kl"><span class="dot"></span>Mention rate</div><div class="kv" id="kv-mrate">&ndash;</div><div class="kd" id="kd-mrate"></div></div>
+      <div class="kpi" style="--kc:var(--m-impr)"><div class="kl"><span class="dot"></span>Avg rank when mentioned</div><div class="kv" id="kv-rank">&ndash;</div><div class="kd" id="kd-rank"></div></div>
+      <div class="kpi" style="--kc:var(--m-ctr)"><div class="kl"><span class="dot"></span>Positive sentiment</div><div class="kv" id="kv-sent">&ndash;</div><div class="kd" id="kd-sent"></div></div>
+      <div class="kpi" style="--kc:var(--m-pos)"><div class="kl"><span class="dot"></span>Prompts covered</div><div class="kv" id="kv-cov">&ndash;</div><div class="kd" id="kd-cov"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Mention rate over time</h3>
+      <div class="hint">% of prompts where B&S was named, by model, per run</div>
+      <div class="chart-h"><canvas id="ch-mtrend"></canvas></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>By category (latest run)</h3>
+        <div class="hint">Where B&S is strong and where the gaps are</div>
+        <div class="chart-s"><canvas id="ch-cat"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Sentiment mix (latest run)</h3>
+        <div class="hint">How AI portrays B&S when it mentions us</div>
+        <div class="chart-s"><canvas id="ch-sent"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tabs-panel" id="pnl-prompts">
+    <div class="card">
+      <div class="card-head">
+        <div><h3>Prompts &amp; latest responses</h3><div class="hint">Click a row to see the full response from each model side-by-side</div></div>
+        <div class="tools"><input type="search" id="p-filter" placeholder="Filter prompts&hellip;"><button class="csv-btn" id="prompts-csv">Export CSV</button></div>
+      </div>
+      <div class="tbl-wrap" id="tbl-prompts"></div>
+    </div>
+  </section>
+
+  <section class="tabs-panel" id="pnl-competitors">
+    <div class="card">
+      <div class="card-head">
+        <div><h3>Share of voice</h3><div class="hint">Which retailers get mentioned most across the prompt corpus, latest run</div></div>
+        <div class="tools"><button class="csv-btn" id="comp-csv">Export CSV</button></div>
+      </div>
+      <div class="chart-h" style="height:400px"><canvas id="ch-comp"></canvas></div>
+    </div>
+  </section>
+
+  <section class="tabs-panel" id="pnl-claims">
+    <div class="card">
+      <h3>Notable claims about B&S</h3>
+      <div class="hint">Every factual claim the AIs made about B&S in the selected window. Claims flagged as inaccurate by the scorer appear at the top.</div>
+      <div id="claims-body"></div>
+    </div>
+  </section>
+
+  <footer>Data: BigQuery <span id="ft-ds"></span> &middot; runs weekly Mondays 06:00 UTC</footer>
+</main>
+
+<!-- Drawer for prompt drilldown -->
+<div id="drawer-bg"></div>
+<div id="drawer">
+  <div class="drawer-head">
+    <div>
+      <div class="dr-type" id="dr-type">PROMPT</div>
+      <h2 id="dr-title">&nbsp;</h2>
+    </div>
+    <button id="dr-close">&#x2715;</button>
+  </div>
+  <div class="dr-body" id="dr-body"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h2>Connection</h2>
+    <p>This dashboard queries BigQuery directly with your Google account. No key files.</p>
+    <div class="field"><label>Signed-in status</label><div id="key-state" style="padding:6px 0"></div></div>
+    <div class="row">
+      <span class="sp"></span>
+      <button class="btn danger" id="key-clear">Sign out</button>
+      <button class="btn prime" id="key-cancel">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════ CONFIG ═══════ */
+const PROJECT = 'commanding-air-450109-p0';
+const DATASET = 'ai_visibility';
+const CLIENT_ID = '46227372300-rk63ag0caqgd7n12gjd0nt7f2qi7llqr.apps.googleusercontent.com';
+const LS_AUTH = 'aiv_google_auth', LS_LOC = 'aiv_bq_location';
+document.getElementById('ft-ds').textContent = PROJECT + '.' + DATASET;
+
+/* ═══════ STATE ═══════ */
+let accessToken = null, tokenExpiry = 0;
+let hasGrant = !!localStorage.getItem(LS_AUTH);
+let D = {};
+let charts = {};
+let promptFilter = '';
+
+/* ═══════ HELPERS ═══════ */
+const $ = id => document.getElementById(id);
+const fmt = n => n==null||isNaN(n) ? '–' : Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+'M' : Math.abs(n)>=10000 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toLocaleString('en-GB');
+const pct = n => n==null||isNaN(n) ? '–' : (n*100).toFixed(n*100>=10?1:2)+'%';
+const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso = d => d.toISOString().slice(0,10);
+function setStatus(msg, err=false){ const s=$('status'); s.textContent=msg; s.className = err?'err':''; }
+function showBanner(msg, isErr=false){ const b=$('banner'); b.innerHTML=msg; b.className='banner show'+(isErr?' error':''); }
+function hideBanner(){ $('banner').className='banner'; }
+function mkChart(id, cfg){ if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id), cfg); return charts[id]; }
+function sentClass(s){ return {positive:'sent-pos', negative:'sent-neg', neutral:'sent-neu', mixed:'sent-mix'}[s] || 'sent-neu'; }
+
+/* ═══════ AUTH ═══════ */
+let tokenClient = null, tokenPending = null, tokenInFlight = null;
+function initTokenClient(){
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/bigquery.readonly',
+    callback: resp => {
+      const p = tokenPending; tokenPending = null;
+      if (!p) return;
+      if (resp.error){ p.reject(new Error(resp.error_description || resp.error)); return; }
+      accessToken = resp.access_token;
+      tokenExpiry = Date.now() + (resp.expires_in ? resp.expires_in*1000 : 3600000);
+      hasGrant = true; localStorage.setItem(LS_AUTH, '1');
+      p.resolve(accessToken);
+    },
+    error_callback: err => {
+      const p = tokenPending; tokenPending = null;
+      if (p) p.reject(new Error(err.message || err.type || 'Sign-in cancelled'));
+    }
+  });
+}
+function requestToken(promptVal){
+  return new Promise((resolve, reject) => {
+    tokenPending = {resolve, reject};
+    tokenClient.requestAccessToken({prompt: promptVal});
+  });
+}
+async function getToken(){
+  if (accessToken && Date.now() < tokenExpiry - 60000) return accessToken;
+  if (typeof google === 'undefined' || !google.accounts) throw new Error('Google sign-in library failed to load');
+  if (!tokenClient) initTokenClient();
+  if (tokenInFlight) return tokenInFlight;
+  tokenInFlight = (async () => {
+    try {
+      if (hasGrant){ try { return await requestToken(''); } catch(e){} }
+      return await requestToken('consent');
+    } finally { tokenInFlight = null; }
+  })();
+  return tokenInFlight;
+}
+function signOut(){
+  if (accessToken && typeof google !== 'undefined' && google.accounts){
+    try { google.accounts.oauth2.revoke(accessToken, ()=>{}); } catch(e){}
+  }
+  accessToken = null; tokenExpiry = 0; hasGrant = false;
+  localStorage.removeItem(LS_AUTH);
+}
+
+/* ═══════ QUERY ═══════ */
+function parseVal(v, type){
+  if (v === null || v === undefined) return null;
+  if (type === 'INTEGER' || type === 'INT64') return parseInt(v, 10);
+  if (type === 'FLOAT' || type === 'FLOAT64' || type === 'NUMERIC') return parseFloat(v);
+  if (type === 'BOOLEAN' || type === 'BOOL') return v === 'true' || v === true;
+  if (type === 'RECORD' || type === 'STRUCT') return parseStruct(v);
+  return v;
+}
+function parseStruct(cell){
+  // Placeholder — for our schema we handle repeated STRUCTs manually in parseRows
+  return cell;
+}
+function parseRows(schema, rows){
+  const fields = schema.fields;
+  return (rows||[]).map(r => {
+    const o = {};
+    fields.forEach((f,i) => {
+      const cell = r.f[i];
+      if (f.mode === 'REPEATED'){
+        const arr = cell.v || [];
+        if (f.type === 'RECORD' || f.type === 'STRUCT'){
+          o[f.name] = arr.map(item => {
+            const sub = {};
+            f.fields.forEach((sf, si) => { sub[sf.name] = parseVal(item.v.f[si].v, sf.type); });
+            return sub;
+          });
+        } else {
+          o[f.name] = arr.map(item => parseVal(item.v, f.type));
+        }
+      } else {
+        o[f.name] = parseVal(cell.v, f.type);
+      }
+    });
+    return o;
+  });
+}
+async function runQuery(sql){
+  const token = await getToken();
+  const locations = [localStorage.getItem(LS_LOC), 'europe-west2', 'EU', 'US'].filter((v,i,a) => v && a.indexOf(v)===i);
+  let lastErr = null;
+  for (const loc of locations){
+    console.log('[BQ] Trying:', loc);
+    const body = {query: sql, useLegacySql:false, timeoutMs:90000, maxResults:10000, location: loc};
+    let res;
+    try {
+      const resp = await fetch(`https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT}/queries`, {
+        method:'POST', headers:{'Authorization':'Bearer '+token, 'Content-Type':'application/json'}, body:JSON.stringify(body)});
+      res = await resp.json();
+    } catch(err){ lastErr = err; continue; }
+    if (res.error){
+      lastErr = new Error(res.error.message);
+      console.warn('[BQ] Error @'+loc+':', res.error.message);
+      if (/not found|location|dataset/i.test(res.error.message)) continue;
+      throw lastErr;
+    }
+    localStorage.setItem(LS_LOC, loc);
+    let out = res;
+    let polls = 0;
+    while (!out.jobComplete){
+      polls++;
+      if (polls > 90) throw new Error('Query timed out');
+      await new Promise(r => setTimeout(r, 1500));
+      const jr = await fetch(`https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT}/queries/${res.jobReference.jobId}?maxResults=10000&location=${res.jobReference.location||loc}`, {headers:{'Authorization':'Bearer '+token}});
+      out = await jr.json();
+      if (out.error) throw new Error(out.error.message);
+    }
+    console.log('[BQ] Complete @'+loc, 'rows:', out.totalRows);
+    return parseRows(out.schema, out.rows);
+  }
+  throw lastErr || new Error('Query failed in all regions');
+}
+
+/* ═══════ SQL BUILDERS ═══════ */
+function buildSQL(){
+  const preset = $('preset').value;
+  const model  = $('model-sel').value;
+  const cat    = $('cat-sel').value;
+  const modelF = model==='all' ? '' : "AND r.model='"+model+"'";
+  const catF   = cat==='all'   ? '' : "AND r.category='"+cat+"'";
+
+  const TR = "`"+PROJECT+"."+DATASET+".runs`";
+  const TA = "`"+PROJECT+"."+DATASET+".analysis`";
+
+  const runsFilter = preset==='latest'
+    ? "run_date = (SELECT MAX(run_date) FROM "+TR+")"
+    : "run_date IN (SELECT run_date FROM (SELECT DISTINCT run_date FROM "+TR+" ORDER BY run_date DESC LIMIT "+parseInt(preset,10)+"))";
+
+  return {
+    kpis:
+      "SELECT r.run_date, r.model, r.category, r.prompt_id, "+
+      "a.bs_mentioned, a.bs_rank, a.bs_sentiment "+
+      "FROM "+TR+" r "+
+      "LEFT JOIN "+TA+" a USING (run_timestamp, model, prompt_id) "+
+      "WHERE r."+runsFilter+" "+modelF+" "+catF+" "+
+      "AND r.error IS NULL",
+    trend:
+      "SELECT r.run_date, r.model, COUNT(*) prompts, COUNTIF(a.bs_mentioned) mentions "+
+      "FROM "+TR+" r "+
+      "LEFT JOIN "+TA+" a USING (run_timestamp, model, prompt_id) "+
+      "WHERE r.run_date >= DATE_SUB((SELECT MAX(run_date) FROM "+TR+"), INTERVAL 180 DAY) "+
+      "AND r.error IS NULL "+catF+" "+
+      "GROUP BY 1, 2 ORDER BY 1, 2",
+    prompts:
+      "SELECT r.prompt_id, r.prompt_text, r.category, r.model, r.response_text, "+
+      "a.bs_mentioned, a.bs_rank, a.bs_sentiment, a.bs_sentiment_reason, "+
+      "a.competitors, a.key_claims, a.claim_flags, a.all_citations "+
+      "FROM "+TR+" r "+
+      "LEFT JOIN "+TA+" a USING (run_timestamp, model, prompt_id) "+
+      "WHERE r."+runsFilter+" "+modelF+" "+catF+" AND r.error IS NULL "+
+      "ORDER BY r.category, r.prompt_id, r.model",
+    competitors:
+      "SELECT c.name k, COUNT(*) mentions "+
+      "FROM "+TA+" a, UNNEST(a.competitors) c "+
+      "WHERE a."+runsFilter+" "+modelF+" "+catF+" "+
+      "GROUP BY 1 ORDER BY 2 DESC LIMIT 30",
+    claims:
+      "SELECT r.run_date, r.model, r.prompt_id, r.prompt_text, claim, TRUE flagged "+
+      "FROM "+TR+" r "+
+      "JOIN "+TA+" a USING (run_timestamp, model, prompt_id), UNNEST(a.claim_flags) claim "+
+      "WHERE r."+runsFilter+" "+modelF+" "+catF+" "+
+      "UNION ALL "+
+      "SELECT r.run_date, r.model, r.prompt_id, r.prompt_text, claim, FALSE flagged "+
+      "FROM "+TR+" r "+
+      "JOIN "+TA+" a USING (run_timestamp, model, prompt_id), UNNEST(a.key_claims) claim "+
+      "WHERE r."+runsFilter+" "+modelF+" "+catF+" "+
+      "AND claim NOT IN (SELECT f FROM UNNEST(a.claim_flags) f) "+
+      "ORDER BY flagged DESC, run_date DESC LIMIT 200"
+  };
+}
+
+/* ═══════ LOAD ═══════ */
+async function loadAll(){
+  if ($('run-btn').disabled) return;
+  hideBanner();
+  $('run-btn').disabled = true;
+  try {
+    const sql = buildSQL();
+    const keys = Object.keys(sql);
+    let done = 0;
+    setStatus(`Loading… 0/${keys.length}`);
+    const results = await Promise.all(keys.map(k =>
+      runQuery(sql[k]).then(rows => { setStatus(`Loading… ${++done}/${keys.length}`); return [k, rows]; })
+    ));
+    D = Object.fromEntries(results);
+    renderAll();
+    setStatus('Loaded');
+  } catch(e){
+    console.error(e);
+    setStatus('Query failed', true);
+    showBanner('<strong>Error:</strong> ' + esc(e.message) + '<br>If this mentions permissions, your account needs BigQuery Data Viewer + Job User on the project. If nothing has been run yet, the tables will be empty until the first weekly cron completes.', true);
+  }
+  $('run-btn').disabled = false;
+}
+
+/* ═══════ RENDER ═══════ */
+const MODEL_COLORS = {chatgpt:'#a8814f', claude:'#3d5747', gemini:'#5b7085'};
+const CAT_LABELS   = {discovery:'Discovery', brand:'Brand-specific', competitor:'Competitor', product:'Product', trust:'Trust'};
+
+function renderAll(){
+  renderKPIs();
+  renderMTrend();
+  renderCat();
+  renderSent();
+  renderPrompts();
+  renderComp();
+  renderClaims();
+  const runs = new Set(D.kpis.map(r=>r.run_date));
+  const latest = runs.size ? [...runs].sort().pop() : null;
+  $('fresh-pill').textContent = 'Latest run: ' + (latest || '–');
+}
+
+function renderKPIs(){
+  const rows = D.kpis || [];
+  const total = rows.length;
+  const mentioned = rows.filter(r=>r.bs_mentioned).length;
+  const mrate = total ? mentioned/total : null;
+  const ranks = rows.filter(r=>r.bs_mentioned && r.bs_rank).map(r=>r.bs_rank);
+  const avgRank = ranks.length ? ranks.reduce((a,b)=>a+b,0)/ranks.length : null;
+  const pos = rows.filter(r=>r.bs_sentiment==='positive').length;
+  const posRate = mentioned ? pos/mentioned : null;
+  const prompts = new Set(rows.filter(r=>r.bs_mentioned).map(r=>r.prompt_id)).size;
+  const allPrompts = new Set(rows.map(r=>r.prompt_id)).size;
+
+  $('kv-mrate').textContent = pct(mrate);
+  $('kd-mrate').textContent = `${mentioned}/${total} responses`;
+  $('kv-rank').textContent = avgRank ? avgRank.toFixed(1) : '–';
+  $('kd-rank').textContent = ranks.length ? `${ranks.length} ranked mentions` : '';
+  $('kv-sent').textContent = pct(posRate);
+  $('kd-sent').textContent = mentioned ? `${pos}/${mentioned} mentions` : '';
+  $('kv-cov').textContent = allPrompts ? `${prompts}/${allPrompts}` : '–';
+  $('kd-cov').textContent = 'distinct prompts';
+
+  $('mention-pill').textContent = 'Mention rate: ' + pct(mrate);
+}
+
+function renderMTrend(){
+  const rows = D.trend || [];
+  const dates = [...new Set(rows.map(r=>r.run_date))].sort();
+  const models = ['chatgpt','claude','gemini'];
+  const ds = models.map(m => ({
+    label: m.charAt(0).toUpperCase()+m.slice(1),
+    data: dates.map(d => {
+      const r = rows.find(x => x.run_date===d && x.model===m);
+      return r && r.prompts ? r.mentions/r.prompts : null;
+    }),
+    borderColor: MODEL_COLORS[m], backgroundColor: MODEL_COLORS[m]+'22',
+    borderWidth:2, pointRadius:3, tension:.25, spanGaps:true
+  }));
+  mkChart('ch-mtrend', {type:'line', data:{labels:dates, datasets:ds},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+pct(c.parsed.y)}}},
+      scales:{x:{grid:{display:false}, ticks:{color:'#98907d', font:{size:11}}},
+              y:{beginAtZero:true, max:1, ticks:{callback:v=>pct(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}}}}});
+}
+
+function renderCat(){
+  const rows = D.kpis || [];
+  const cats = ['discovery','brand','competitor','product','trust'];
+  const data = cats.map(c => {
+    const r = rows.filter(x => x.category===c);
+    return r.length ? r.filter(x=>x.bs_mentioned).length / r.length : 0;
+  });
+  mkChart('ch-cat', {type:'bar', data:{labels:cats.map(c=>CAT_LABELS[c]),
+    datasets:[{data, backgroundColor:'#a8814f', borderRadius:3}]},
+    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'Mention rate: '+pct(c.parsed.x)}}},
+      scales:{x:{beginAtZero:true, max:1, ticks:{callback:v=>pct(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}},
+              y:{ticks:{color:'#27231c', font:{size:12}}, grid:{display:false}}}}});
+}
+
+function renderSent(){
+  const rows = (D.kpis||[]).filter(r=>r.bs_mentioned);
+  const counts = {positive:0, neutral:0, mixed:0, negative:0};
+  rows.forEach(r => { if (counts[r.bs_sentiment]!==undefined) counts[r.bs_sentiment]++; });
+  mkChart('ch-sent', {type:'doughnut', data:{labels:['Positive','Neutral','Mixed','Negative'],
+    datasets:[{data:Object.values(counts), backgroundColor:['#3e7048','#8b8272','#a8814f','#a13d2d'], borderWidth:2, borderColor:'#fffdf8'}]},
+    options:{responsive:true, maintainAspectRatio:false, cutout:'58%',
+      plugins:{legend:{position:'right', labels:{boxWidth:12, font:{size:11}}}}}});
+}
+
+function renderPrompts(){
+  const f = promptFilter.toLowerCase();
+  // Latest response per prompt+model
+  const rows = (D.prompts||[]).filter(r =>
+    !f || (r.prompt_text||'').toLowerCase().includes(f) || (r.prompt_id||'').toLowerCase().includes(f));
+  // Group by prompt
+  const byPrompt = {};
+  rows.forEach(r => {
+    if (!byPrompt[r.prompt_id]) byPrompt[r.prompt_id] = {id:r.prompt_id, text:r.prompt_text, category:r.category, models:{}};
+    byPrompt[r.prompt_id].models[r.model] = r;
+  });
+  const list = Object.values(byPrompt);
+  const models = ['chatgpt','claude','gemini'];
+
+  $('tbl-prompts').innerHTML = list.length ? `<table><thead><tr>
+    <th class="txt">Prompt</th>
+    <th class="txt">Category</th>
+    ${models.map(m=>`<th>${m.charAt(0).toUpperCase()+m.slice(1)}</th>`).join('')}
+  </tr></thead><tbody>` +
+    list.map(p => `<tr class="prompt-row" data-pid="${esc(p.id)}">
+      <td class="txt">${esc(p.text)}</td>
+      <td class="txt"><span class="mut">${CAT_LABELS[p.category]||p.category}</span></td>
+      ${models.map(m => {
+        const r = p.models[m];
+        if (!r) return '<td><span class="mut">&ndash;</span></td>';
+        if (!r.bs_mentioned) return '<td><span class="badge miss">not mentioned</span></td>';
+        return `<td><span class="badge ok">${r.bs_rank?'#'+r.bs_rank:'named'}</span> <span class="${sentClass(r.bs_sentiment)}">${r.bs_sentiment||'–'}</span></td>`;
+      }).join('')}
+    </tr>`).join('') +
+    '</tbody></table>' : '<div class="empty">No prompts match the filter</div>';
+
+  // Wire row clicks
+  document.querySelectorAll('.prompt-row').forEach(tr => tr.addEventListener('click', () => openDrawer(tr.dataset.pid)));
+}
+
+function openDrawer(pid){
+  const rows = (D.prompts||[]).filter(r => r.prompt_id === pid);
+  if (!rows.length) return;
+  const p = rows[0];
+  $('dr-type').textContent = 'PROMPT · ' + (CAT_LABELS[p.category]||p.category).toUpperCase();
+  $('dr-title').textContent = p.prompt_text;
+  const models = ['chatgpt','claude','gemini'];
+  $('dr-body').innerHTML = `<div class="grid3">` +
+    models.map(m => {
+      const r = rows.find(x => x.model === m);
+      if (!r) return `<div class="model-col"><h4>${m}</h4><p class="mut">no data</p></div>`;
+      const cmps = (r.competitors||[]).map(c => esc(c.name) + (c.rank?` #${c.rank}`:'')).join(', ') || '<span class="mut">none</span>';
+      const flags = (r.claim_flags||[]).map(c => `<div class="claim-flag">⚠ ${esc(c)}</div>`).join('');
+      const claims = (r.key_claims||[]).filter(c => !(r.claim_flags||[]).includes(c)).map(c => `<div style="margin:4px 0;font-size:12.5px">• ${esc(c)}</div>`).join('');
+      return `<div class="model-col">
+        <h4>${m.charAt(0).toUpperCase()+m.slice(1)}</h4>
+        <div style="margin-bottom:8px">
+          ${r.bs_mentioned ? `<span class="badge ok">mentioned${r.bs_rank?' #'+r.bs_rank:''}</span> <span class="${sentClass(r.bs_sentiment)}" style="font-size:12px">${r.bs_sentiment||''}</span>`
+                           : `<span class="badge miss">not mentioned</span>`}
+        </div>
+        ${r.bs_sentiment_reason ? `<div class="mut" style="font-size:12px;margin-bottom:8px">${esc(r.bs_sentiment_reason)}</div>` : ''}
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Response</div>
+        <div class="response-box">${esc(r.response_text||'')}</div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Competitors named</div>
+        <div style="font-size:12.5px">${cmps}</div>
+        ${flags ? '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Flagged claims</div>'+flags : ''}
+        ${claims ? '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Key claims</div>'+claims : ''}
+      </div>`;
+    }).join('') + `</div>`;
+  $('drawer').classList.add('show');
+  $('drawer-bg').classList.add('show');
+}
+
+function renderComp(){
+  const rows = D.competitors || [];
+  mkChart('ch-comp', {type:'bar', data:{labels:rows.map(r=>r.k),
+    datasets:[{data:rows.map(r=>r.mentions), backgroundColor:'#3d5747', borderRadius:3}]},
+    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.x+' mentions'}}},
+      scales:{x:{beginAtZero:true, ticks:{color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}},
+              y:{ticks:{color:'#27231c', font:{size:12}}, grid:{display:false}}}}});
+}
+
+function renderClaims(){
+  const rows = D.claims || [];
+  if (!rows.length){ $('claims-body').innerHTML = '<div class="empty">No claims yet</div>'; return; }
+  $('claims-body').innerHTML = rows.map(r => `
+    <div style="border-bottom:1px solid var(--line);padding:12px 0">
+      ${r.flagged ? '<span class="badge" style="background:#f8e9e2;color:#a13d2d">FLAGGED</span> ' : ''}
+      <span class="mut" style="font-size:12px">${r.run_date} · ${r.model} · ${esc(r.prompt_id)}</span>
+      <div style="margin-top:4px;font-size:13px">${esc(r.claim)}</div>
+      <div class="mut" style="font-size:11.5px;margin-top:2px">prompt: ${esc(r.prompt_text)}</div>
+    </div>
+  `).join('');
+}
+
+/* ═══════ EVENTS ═══════ */
+$('run-btn').addEventListener('click', loadAll);
+['preset','model-sel','cat-sel'].forEach(id => $(id).addEventListener('change', () => { if (D.kpis) loadAll(); }));
+$('p-filter').addEventListener('input', e => { promptFilter = e.target.value; if (D.prompts) renderPrompts(); });
+
+document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('nav.tabs button').forEach(x => x.classList.remove('on'));
+  document.querySelectorAll('.tabs-panel').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  $('pnl-' + b.dataset.tab).classList.add('on');
+}));
+
+$('dr-close').addEventListener('click', () => { $('drawer').classList.remove('show'); $('drawer-bg').classList.remove('show'); });
+$('drawer-bg').addEventListener('click', () => { $('drawer').classList.remove('show'); $('drawer-bg').classList.remove('show'); });
+
+$('prompts-csv').addEventListener('click', () => {
+  const rows = D.prompts || [];
+  const csv = [['prompt_id','category','model','bs_mentioned','bs_rank','bs_sentiment','competitors','response_text']].concat(
+    rows.map(r => [r.prompt_id, r.category, r.model, r.bs_mentioned, r.bs_rank, r.bs_sentiment, (r.competitors||[]).map(c=>c.name).join('|'), r.response_text])
+  ).map(r => r.map(v => { v=v==null?'':String(v); return /[,"\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));
+  a.download = 'ai_visibility_prompts_'+iso(new Date())+'.csv'; a.click();
+});
+$('comp-csv').addEventListener('click', () => {
+  const rows = D.competitors || [];
+  const csv = ['competitor,mentions', ...rows.map(r=>r.k+','+r.mentions)].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));
+  a.download = 'ai_visibility_competitors_'+iso(new Date())+'.csv'; a.click();
+});
+
+$('key-btn').addEventListener('click', () => {
+  $('key-state').textContent = hasGrant ? 'Signed in with Google' : 'Not signed in — click Run and sign in when prompted';
+  $('modal-bg').classList.add('show');
+});
+$('key-cancel').addEventListener('click', () => $('modal-bg').classList.remove('show'));
+$('modal-bg').addEventListener('click', e => { if (e.target === $('modal-bg')) $('modal-bg').classList.remove('show'); });
+$('key-clear').addEventListener('click', () => { signOut(); $('key-state').textContent = 'Signed out'; });
+
+/* ═══════ INIT ═══════ */
+(function init(){
+  if (hasGrant) showBanner('Click <strong>Run</strong> to load the latest AI visibility data.');
+  else showBanner('First run: click <strong>Run</strong> and sign in with your Google account.');
+})();
+</script>
+</body>
+</html>

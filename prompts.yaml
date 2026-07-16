@@ -1,0 +1,318 @@
+# B&S AI Visibility — prompt corpus
+# Edit freely. Each prompt runs weekly across ChatGPT, Claude, Gemini.
+# Categories:
+#   discovery      — customer doesn't yet know which brand; B&S needs to surface
+#   brand          — question is specifically about B&S
+#   competitor     — question centres on a rival; is B&S offered as alternative?
+#   product        — buying-intent, category/product-specific
+#   trust          — friction/consideration points, quality, delivery, returns
+
+# ─── 1. CATEGORY DISCOVERY ────────────────────────────────
+- id: disc_001
+  category: discovery
+  text: best uk sofa brands 2026
+- id: disc_002
+  category: discovery
+  text: where can i buy premium furniture in the uk
+- id: disc_003
+  category: discovery
+  text: british made sofa brands
+- id: disc_004
+  category: discovery
+  text: best places to buy a leather sofa uk
+- id: disc_005
+  category: discovery
+  text: where to buy ercol furniture
+- id: disc_006
+  category: discovery
+  text: high end furniture stores uk
+- id: disc_007
+  category: discovery
+  text: best furniture shops in the north east
+- id: disc_008
+  category: discovery
+  text: where to buy quality dining tables uk
+- id: disc_009
+  category: discovery
+  text: independent furniture retailers uk
+- id: disc_010
+  category: discovery
+  text: family run furniture stores uk
+- id: disc_011
+  category: discovery
+  text: best furniture shops for handmade sofas
+- id: disc_012
+  category: discovery
+  text: uk furniture brands with showrooms in yorkshire
+- id: disc_013
+  category: discovery
+  text: where to buy stressless recliners uk
+- id: disc_014
+  category: discovery
+  text: best places to buy tempur mattresses uk
+- id: disc_015
+  category: discovery
+  text: uk retailers that sell simba mattresses in store
+- id: disc_016
+  category: discovery
+  text: where can i see ercol furniture in person
+- id: disc_017
+  category: discovery
+  text: best furniture shops in newcastle
+- id: disc_018
+  category: discovery
+  text: furniture stores in leeds
+- id: disc_019
+  category: discovery
+  text: best furniture shops in london
+- id: disc_020
+  category: discovery
+  text: where to buy scandinavian style furniture uk
+- id: disc_021
+  category: discovery
+  text: mid century modern furniture uk retailers
+- id: disc_022
+  category: discovery
+  text: best online furniture stores uk
+- id: disc_023
+  category: discovery
+  text: luxury furniture brands uk
+- id: disc_024
+  category: discovery
+  text: uk sofa brands that use natural fabrics
+- id: disc_025
+  category: discovery
+  text: best sofa brands for durability
+- id: disc_026
+  category: discovery
+  text: where to buy handmade british sofas
+- id: disc_027
+  category: discovery
+  text: furniture stores with good reviews uk
+- id: disc_028
+  category: discovery
+  text: sofa brands trustpilot ratings
+- id: disc_029
+  category: discovery
+  text: best sofa brands for families
+- id: disc_030
+  category: discovery
+  text: where to buy a chesterfield sofa uk
+
+# ─── 2. BRAND-SPECIFIC ────────────────────────────────────
+- id: brand_001
+  category: brand
+  text: is barker and stonehouse good quality
+- id: brand_002
+  category: brand
+  text: barker and stonehouse reviews
+- id: brand_003
+  category: brand
+  text: where are barker and stonehouse stores
+- id: brand_004
+  category: brand
+  text: are barker and stonehouse sofas worth the money
+- id: brand_005
+  category: brand
+  text: barker and stonehouse delivery cost
+- id: brand_006
+  category: brand
+  text: does barker and stonehouse deliver to scotland
+- id: brand_007
+  category: brand
+  text: barker and stonehouse returns policy
+- id: brand_008
+  category: brand
+  text: who owns barker and stonehouse
+- id: brand_009
+  category: brand
+  text: is barker and stonehouse a british company
+- id: brand_010
+  category: brand
+  text: how long has barker and stonehouse been around
+- id: brand_011
+  category: brand
+  text: barker and stonehouse sale dates
+- id: brand_012
+  category: brand
+  text: what brands does barker and stonehouse sell
+- id: brand_013
+  category: brand
+  text: barker and stonehouse ercol range
+- id: brand_014
+  category: brand
+  text: does barker and stonehouse have a finance option
+- id: brand_015
+  category: brand
+  text: barker and stonehouse warranty
+
+# ─── 3. COMPETITOR-CENTRIC ────────────────────────────────
+- id: comp_001
+  category: competitor
+  text: alternatives to dfs uk
+- id: comp_002
+  category: competitor
+  text: alternatives to john lewis furniture
+- id: comp_003
+  category: competitor
+  text: alternatives to heals uk
+- id: comp_004
+  category: competitor
+  text: alternatives to sofology
+- id: comp_005
+  category: competitor
+  text: alternatives to sofa workshop
+- id: comp_006
+  category: competitor
+  text: better sofa brands than dfs
+- id: comp_007
+  category: competitor
+  text: cheaper alternatives to heals
+- id: comp_008
+  category: competitor
+  text: is furniture village good
+- id: comp_009
+  category: competitor
+  text: john lewis vs barker and stonehouse
+- id: comp_010
+  category: competitor
+  text: heals vs barker and stonehouse
+- id: comp_011
+  category: competitor
+  text: sofology vs barker and stonehouse
+- id: comp_012
+  category: competitor
+  text: is oak furnitureland good quality
+- id: comp_013
+  category: competitor
+  text: alternatives to loaf sofas
+- id: comp_014
+  category: competitor
+  text: alternatives to made.com uk
+- id: comp_015
+  category: competitor
+  text: sofa brands similar to heals
+- id: comp_016
+  category: competitor
+  text: cotswold company vs barker and stonehouse
+- id: comp_017
+  category: competitor
+  text: dfs vs sofology vs barker and stonehouse
+- id: comp_018
+  category: competitor
+  text: uk sofa brands like restoration hardware
+- id: comp_019
+  category: competitor
+  text: is habitat still a good furniture brand
+- id: comp_020
+  category: competitor
+  text: dfs alternatives with better quality
+
+# ─── 4. PRODUCT / CATEGORY BUYING INTENT ──────────────────
+- id: prod_001
+  category: product
+  text: best leather sofa under 3000
+- id: prod_002
+  category: product
+  text: best extending oak dining table for 8
+- id: prod_003
+  category: product
+  text: where to buy an ercol dining table uk
+- id: prod_004
+  category: product
+  text: ercol windsor chair uk stockists
+- id: prod_005
+  category: product
+  text: best corner sofa uk 2026
+- id: prod_006
+  category: product
+  text: best recliner sofa uk
+- id: prod_007
+  category: product
+  text: velvet sofa uk retailers
+- id: prod_008
+  category: product
+  text: uk retailers for stressless armchairs
+- id: prod_009
+  category: product
+  text: kartell furniture uk stockists
+- id: prod_010
+  category: product
+  text: bontempi dining tables uk
+- id: prod_011
+  category: product
+  text: eichholtz furniture uk stockists
+- id: prod_012
+  category: product
+  text: tetrad sofas uk
+- id: prod_013
+  category: product
+  text: best dining chairs to buy in a set of 6
+- id: prod_014
+  category: product
+  text: modular sofa systems uk
+- id: prod_015
+  category: product
+  text: best bed frames uk
+- id: prod_016
+  category: product
+  text: uk stockists of tempur mattresses
+- id: prod_017
+  category: product
+  text: simba hybrid pro in store
+- id: prod_018
+  category: product
+  text: solid oak coffee tables uk
+- id: prod_019
+  category: product
+  text: handmade wardrobes uk
+- id: prod_020
+  category: product
+  text: best sideboard for a modern dining room
+- id: prod_021
+  category: product
+  text: extending glass dining table uk
+- id: prod_022
+  category: product
+  text: leather chesterfield sofa uk buy
+- id: prod_023
+  category: product
+  text: linen sofa brands uk
+- id: prod_024
+  category: product
+  text: where to buy a tall bookcase uk
+- id: prod_025
+  category: product
+  text: kids bedroom furniture sets uk
+
+# ─── 5. TRUST / CONSIDERATION ─────────────────────────────
+- id: trust_001
+  category: trust
+  text: is barker and stonehouse trustworthy
+- id: trust_002
+  category: trust
+  text: how reliable is barker and stonehouse delivery
+- id: trust_003
+  category: trust
+  text: barker and stonehouse complaints
+- id: trust_004
+  category: trust
+  text: how long do barker and stonehouse sofas last
+- id: trust_005
+  category: trust
+  text: barker and stonehouse customer service reviews
+- id: trust_006
+  category: trust
+  text: are barker and stonehouse prices fair
+- id: trust_007
+  category: trust
+  text: is barker and stonehouse expensive
+- id: trust_008
+  category: trust
+  text: are barker and stonehouse sofas made in the uk
+- id: trust_009
+  category: trust
+  text: barker and stonehouse trustpilot
+- id: trust_010
+  category: trust
+  text: has anyone had issues with barker and stonehouse delivery
