@@ -488,7 +488,7 @@ function buildSQL(){
   const TA = "`"+PROJECT+"."+DATASET+".analysis`";
 
   const runsFilter = preset==='latest'
-    ? "run_date = (SELECT MAX(run_date) FROM "+TR+")"
+    ? "run_timestamp = (SELECT MAX(run_timestamp) FROM "+TR+")"
     : "run_date IN (SELECT run_date FROM (SELECT DISTINCT run_date FROM "+TR+" ORDER BY run_date DESC LIMIT "+parseInt(preset,10)+"))";
 
   return {
@@ -517,7 +517,7 @@ function buildSQL(){
     competitors:
       "SELECT c.name k, COUNT(*) mentions "+
       "FROM "+TA+" a, UNNEST(a.competitors) c "+
-      "WHERE a."+runsFilter+" "+modelF+" "+catF+" "+
+      "WHERE a."+runsFilter+" "+(modelF.replace(/AND r\./, 'AND a.'))+" "+(catF.replace(/AND r\./, 'AND a.'))+" "+
       "GROUP BY 1 ORDER BY 2 DESC LIMIT 30",
     claims:
       "SELECT r.run_date, r.model, r.prompt_id, r.prompt_text, claim, TRUE flagged "+
