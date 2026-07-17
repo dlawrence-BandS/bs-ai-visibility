@@ -13,7 +13,8 @@
 :root{
   --navy:#1f332a; --navy-d:#15241d; --bg:#f4f1ea; --card:#fffdf8; --ink:#27231c; --mut:#8b8272;
   --line:#e7e0d2; --brass:#a8814f; --brass-d:#8f6c3f;
-  --m-clicks:#a8814f; --m-impr:#3d5747; --m-ctr:#5b7085; --m-pos:#b45f42;
+  --m-mention:#a8814f; --m-sov:#3d5747; --m-non:#5b7085; --m-sent:#b45f42; --m-cov:#8a693d;
+  --bs:#a8814f;
   --up:#3e7048; --dn:#a13d2d; --up-bg:#eaf0e4; --dn-bg:#f8e9e2;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -21,7 +22,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--i
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:13px}
 
-/* ── Header ─────────────────────────────── */
 header{background:var(--navy);color:#fff;padding:22px 30px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:3px solid var(--brass)}
 header h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;letter-spacing:.4px}
 header .sub{font-size:11px;opacity:.72;text-transform:uppercase;letter-spacing:1.6px;margin-top:2px}
@@ -30,144 +30,76 @@ header .meta .pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255
 #key-btn{background:transparent;border:1px solid var(--brass);color:#e8d9c2;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:.3px}
 #key-btn:hover{background:var(--brass);color:#fff}
 
-/* ── Controls ───────────────────────────── */
 .controls{background:#fff;border-bottom:1px solid var(--line);padding:12px 28px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;position:sticky;top:0;z-index:40}
 .ctl{display:flex;flex-direction:column;gap:4px}
 .ctl label{font-size:10.5px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.6px}
 .ctl select,.ctl input{border:1px solid #d4ccbb;border-radius:8px;padding:7px 10px;background:#fff;min-width:130px}
-.ctl input[type=date]{min-width:140px}
-#custom-dates{display:none;gap:14px}
-#custom-dates.show{display:flex}
-.chk{display:flex;align-items:center;gap:7px;padding-bottom:8px;font-size:13px;color:var(--ink)}
-.chk input{min-width:0}
 #run-btn{background:var(--brass);color:#fff;border:none;border-radius:8px;padding:9px 28px;font-weight:600;font-size:13.5px;letter-spacing:.4px}
 #run-btn:hover{background:var(--brass-d)}
 #run-btn:disabled{opacity:.55;cursor:wait}
 #status{font-size:12px;color:var(--mut);padding-bottom:9px;min-width:150px}
 #status.err{color:var(--dn);font-weight:600}
 
-/* ── Layout ─────────────────────────────── */
-main{max-width:1360px;margin:0 auto;padding:22px 28px 60px}
+main{max-width:1400px;margin:0 auto;padding:22px 28px 60px}
 .banner{background:#fff8e6;border:1px solid #f0dfa8;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;line-height:1.55;display:none}
 .banner.show{display:block}
 .banner.error{background:var(--dn-bg);border-color:#f0b9b6}
 
-/* KPI cards */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-bottom:16px}
-.kpi{background:var(--card);border-radius:12px;padding:16px 18px 14px;border:1px solid var(--line);border-top:4px solid var(--kc,#999);cursor:pointer;transition:box-shadow .15s, transform .15s;user-select:none}
-.kpi:hover{box-shadow:0 4px 14px rgba(20,35,70,.08)}
-.kpi.off{opacity:.45;border-top-color:#c8cdd8}
+/* View toggle - Exec vs Detail */
+.view-toggle{background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px;display:inline-flex;margin-bottom:18px;gap:4px}
+.view-toggle button{background:transparent;border:none;padding:8px 20px;font-size:13px;font-weight:600;border-radius:7px;color:var(--mut)}
+.view-toggle button.on{background:var(--navy);color:#fff}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:var(--card);border-radius:12px;padding:16px 18px 14px;border:1px solid var(--line);border-top:4px solid var(--kc,#999);position:relative}
+.kpi.big{padding:22px 24px 18px}
 .kpi .kl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--mut);display:flex;align-items:center;gap:6px}
 .kpi .kl .dot{width:9px;height:9px;border-radius:50%;background:var(--kc)}
-.kpi .kv{font-size:29px;font-weight:600;margin:6px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.kpi .kv{font-size:32px;font-weight:600;margin:8px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.kpi.big .kv{font-size:38px}
 .kpi .kd{font-size:12px;color:var(--mut)}
+.kpi .kh{font-size:11.5px;color:var(--mut);margin-top:6px;line-height:1.5;font-style:italic}
+.kpi .info{position:absolute;top:14px;right:14px;width:18px;height:18px;border-radius:50%;background:#f2ede1;color:var(--mut);display:inline-flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;cursor:help;user-select:none}
+.kpi .info:hover{background:var(--brass);color:#fff}
+.kpi .info .tt{position:absolute;top:26px;right:0;background:var(--ink);color:#fff;font-weight:400;font-size:12px;line-height:1.55;padding:9px 12px;border-radius:8px;width:260px;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.25);display:none;text-transform:none;letter-spacing:0}
+.kpi .info:hover .tt{display:block}
 .chg{display:inline-flex;align-items:center;gap:3px;font-weight:600;font-size:12px;padding:2px 8px;border-radius:12px;font-variant-numeric:tabular-nums}
 .chg.up{color:var(--up);background:var(--up-bg)}
 .chg.dn{color:var(--dn);background:var(--dn-bg)}
 .chg.fl{color:var(--mut);background:#eeeade}
 
-/* Cards & tabs */
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
-.card h3{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;margin-bottom:2px;letter-spacing:.2px}
-.card .hint{font-size:12px;color:var(--mut);margin-bottom:12px}
-.card-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:16px}
+.card h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:2px;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.card .hint{font-size:12.5px;color:var(--mut);margin-bottom:14px;line-height:1.55}
+.card-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .card-head .tools{margin-left:auto;display:flex;gap:8px;align-items:center}
-.tools input[type=search]{border:1px solid #d4ccbb;border-radius:8px;padding:6px 10px;width:210px}
+.tools input[type=search]{border:1px solid #d4ccbb;border-radius:8px;padding:6px 10px;width:220px}
 .csv-btn{background:#fff;border:1px solid #d4ccbb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy)}
 .csv-btn:hover{background:#f2ede1}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
 
 nav.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:6px 0 18px;flex-wrap:wrap}
-nav.tabs button{background:none;border:none;padding:10px 18px;font-size:13.5px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-2px}
+nav.tabs button{background:none;border:none;padding:10px 20px;font-size:13.5px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-2px}
 nav.tabs button.on{color:var(--navy);border-bottom-color:var(--brass)}
-.panel{display:none}
-.panel.on{display:block}
+.tabs-panel{display:none} .tabs-panel.on{display:block}
 
-/* Tables */
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);text-align:right;padding:8px 10px;border-bottom:2px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);text-align:right;padding:9px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
 th.txt, td.txt{text-align:left}
-th.sorted{color:var(--navy)}
-td{padding:8px 10px;border-bottom:1px solid #f0f2f6;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #f0ecdf;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.txt{white-space:normal;word-break:break-word;max-width:440px}
 tr:hover td{background:#faf7ef}
-td .qlink{color:var(--ink);text-decoration:none}
-td .qlink:hover{color:var(--m-clicks);text-decoration:underline}
-.posb{display:inline-block;min-width:44px;text-align:center;padding:2px 7px;border-radius:10px;font-weight:600;font-size:12px}
-.posb.p1{background:#e2f0e8;color:#0d7a3f}.posb.p2{background:#fdf3e3;color:#b06000}.posb.p3{background:#fdeae4;color:#c04b1d}.posb.p4{background:#eeeade;color:#6b7280}
-.mut{color:var(--mut)}
-.empty{padding:26px;text-align:center;color:var(--mut);font-size:13px}
-canvas{max-width:100%}
-.chart-h{position:relative;height:330px}
-.chart-s{position:relative;height:280px}
-
-/* Modal */
-.modal-bg{position:fixed;inset:0;background:rgba(15,25,50,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
-.modal-bg.show{display:flex}
-.modal{background:#fff;border-radius:14px;max-width:640px;width:100%;padding:26px 28px}
-.modal h2{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;margin-bottom:8px}
-.modal p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px}
-.modal textarea{width:100%;height:96px;border:1px solid #d4ccbb;border-radius:10px;padding:12px;font-family:ui-monospace,monospace;font-size:11.5px;resize:vertical}
-.modal input[type=file]{width:100%;border:1px dashed #aab4c8;border-radius:10px;padding:14px 12px;background:#faf7ef;font-size:12.5px;cursor:pointer}
-.modal input[type=file]::file-selector-button{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-weight:600;font-size:12px;margin-right:12px;cursor:pointer}
-.modal input[type=file].ok{border-color:#0d7a3f;background:#f0f9f3}
-.modal .row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
-.modal .row .sp{margin-left:auto}
-.btn{border-radius:8px;padding:9px 20px;font-weight:600;font-size:13px;border:1px solid #d4ccbb;background:#fff}
-.btn.prime{background:var(--navy);color:#fff;border-color:var(--navy)}
-.btn.danger{color:var(--dn);border-color:#f0b9b6}
-#key-state{font-size:12px;color:var(--mut)}
-.modal .field{margin-top:14px}
-.modal .field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:5px}
-.modal .field input{width:100%;border:1px solid #d4ccbb;border-radius:8px;padding:8px 10px}
-
-footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
-.mini-btn{background:#fff;border:1px solid #d4ccbb;border-radius:8px;padding:0 10px;font-size:13px;color:var(--navy)}
-.mini-btn:hover{background:#f2ede1}
-.qdrill{cursor:pointer;border-bottom:1px dashed #b9c4d8}
-.qdrill:hover{color:var(--m-clicks);border-bottom-color:var(--m-clicks)}
-a.ext{text-decoration:none;color:#9aa3b5;font-size:11px;margin-left:4px}
-a.ext:hover{color:var(--m-clicks)}
-
-/* Drill drawer */
-#drawer-bg{position:fixed;inset:0;background:rgba(15,25,50,.4);display:none;z-index:80}
-#drawer-bg.show{display:block}
-#drawer{position:fixed;top:0;right:-580px;width:560px;max-width:96vw;height:100vh;background:#fff;z-index:90;box-shadow:-8px 0 30px rgba(15,25,50,.2);transition:right .25s ease;display:flex;flex-direction:column}
-#drawer.show{right:0}
-.drawer-head{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:12px}
-.drawer-head .dr-type{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)}
-.drawer-head h2{font-size:16px;font-weight:700;word-break:break-word;margin-top:2px}
-.drawer-head button{margin-left:auto;background:none;border:none;font-size:17px;color:var(--mut);flex:none}
-.dr-body{padding:16px 22px;overflow-y:auto}
-.dr-links{font-size:12.5px;margin-bottom:12px}
-.dr-loading{padding:30px;text-align:center;color:var(--mut)}
-
-/* Ask AI */
-#ai-fab{position:fixed;bottom:22px;right:22px;z-index:70;background:var(--navy);color:#fff;border:1px solid var(--brass);border-radius:26px;padding:13px 22px;font-weight:600;font-size:13.5px;box-shadow:0 6px 18px rgba(35,30,20,.3)}
-#ai-fab:hover{background:var(--navy-d)}
-#ai-panel{position:fixed;bottom:22px;right:22px;width:420px;max-width:94vw;height:560px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(15,25,50,.3);z-index:75;display:none;flex-direction:column;overflow:hidden}
-#ai-panel.show{display:flex}
-.ai-head{background:var(--navy);color:#fff;padding:13px 16px;font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:10px}
-.ai-head button{background:none;border:none;color:#fff;opacity:.8;font-size:12px}
-.ai-head button:hover{opacity:1}
-.ai-head .x{margin-left:auto;font-size:15px}
-.ai-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.ai-msg{max-width:88%;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
-.ai-msg.user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
-.ai-msg.bot{align-self:flex-start;background:#f2ede1;border-bottom-left-radius:4px}
-.ai-msg.think{align-self:flex-start;color:var(--mut);font-style:italic;padding:4px 13px}
-.ai-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
-.ai-input textarea{flex:1;border:1px solid #d4ccbb;border-radius:10px;padding:9px 11px;resize:none;font-size:13px}
-.ai-input button{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:0 18px;font-weight:600}
-.ai-input button:disabled{opacity:.5}
-</style>
-<style>
-/* Extra styles specific to this dashboard */
-.tabs-panel{display:none} .tabs-panel.on{display:block}
 .prompt-row{cursor:pointer}
-.prompt-row:hover td{background:#faf7ef}
+.mut{color:var(--mut)}
+.empty{padding:28px;text-align:center;color:var(--mut);font-size:13px}
+canvas{max-width:100%}
+.chart-h{position:relative;height:340px}
+.chart-s{position:relative;height:260px}
+
 .sent-pos{color:var(--up);font-weight:600}
 .sent-neg{color:var(--dn);font-weight:600}
 .sent-neu{color:var(--mut)}
@@ -175,13 +107,60 @@ a.ext:hover{color:var(--m-clicks)}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.2px}
 .badge.ok{background:#e6efe2;color:#3e7048}
 .badge.miss{background:#eeeade;color:#8b8272}
-.claim-flag{background:#f8e9e2;border-left:3px solid var(--dn);padding:6px 10px;margin:4px 0;font-size:12.5px}
+.badge.bs{background:#f5e9d8;color:#8f6c3f;border:1px solid #d4b389}
+.claim-flag{background:#f8e9e2;border-left:3px solid var(--dn);padding:6px 10px;margin:4px 0;font-size:12.5px;border-radius:0 6px 6px 0}
+
 .model-col{border-left:1px solid var(--line);padding:14px 16px}
 .model-col:first-child{border-left:none}
 .model-col h4{font-family:'Cormorant Garamond',serif;font-size:17px;margin-bottom:8px}
-.response-box{background:#faf7ef;border-radius:8px;padding:12px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;max-height:400px;overflow-y:auto}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-@media(max-width:1000px){.grid3{grid-template-columns:1fr}}
+.response-box{background:#faf7ef;border-radius:8px;padding:12px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;max-height:420px;overflow-y:auto}
+
+/* Drawer */
+#drawer-bg{position:fixed;inset:0;background:rgba(15,25,50,.4);display:none;z-index:80}
+#drawer-bg.show{display:block}
+#drawer{position:fixed;top:0;right:-96vw;width:min(1100px,96vw);height:100vh;background:#fff;z-index:90;box-shadow:-8px 0 30px rgba(15,25,50,.2);transition:right .25s ease;display:flex;flex-direction:column}
+#drawer.show{right:0}
+.drawer-head{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:12px}
+.drawer-head .dr-type{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)}
+.drawer-head h2{font-size:17px;font-weight:700;word-break:break-word;margin-top:2px;font-family:'Inter',sans-serif}
+.drawer-head button{margin-left:auto;background:none;border:none;font-size:17px;color:var(--mut);flex:none;cursor:pointer}
+.dr-body{padding:0 6px 20px;overflow-y:auto;flex:1}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,25,50,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:640px;width:100%;padding:26px 28px}
+.modal h2{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px}
+.btn{border-radius:8px;padding:9px 20px;font-weight:600;font-size:13px;border:1px solid #d4ccbb;background:#fff;cursor:pointer}
+.btn.prime{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.danger{color:var(--dn);border-color:#f0b9b6}
+.modal .row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.modal .row .sp{margin-left:auto}
+.field{margin-top:14px}
+.field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:5px}
+
+footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
+
+/* Help content */
+.help-block{background:#faf7ef;border-radius:10px;padding:16px 18px;margin-bottom:14px;line-height:1.65;font-size:13.5px}
+.help-block h4{font-family:'Cormorant Garamond',serif;font-size:17px;margin-bottom:6px;color:var(--navy)}
+.help-block p{margin-bottom:8px}
+.help-block ul{padding-left:22px;margin:6px 0}
+.help-block li{margin-bottom:4px}
+.help-block strong{color:var(--ink)}
+.help-block code{background:#fff;padding:1px 6px;border-radius:4px;font-size:12.5px;border:1px solid var(--line)}
+
+/* Exec view: big summary line */
+.exec-summary{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 26px;margin-bottom:18px;font-size:15.5px;line-height:1.65}
+.exec-summary strong{color:var(--navy);font-weight:600}
+.exec-summary .lead{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--navy);margin-bottom:8px;letter-spacing:.2px}
+
+/* Sortable table headers */
+th.srt{cursor:pointer;user-select:none}
+th.srt:hover{color:var(--navy)}
+th.srt.asc:after{content:' \25b2';font-size:9px}
+th.srt.desc:after{content:' \25bc';font-size:9px}
 </style>
 </head>
 <body>
@@ -211,97 +190,240 @@ a.ext:hover{color:var(--m-clicks)}
   <div class="ctl">
     <label>Model</label>
     <select id="model-sel">
-      <option value="all" selected>All models</option>
-      <option value="chatgpt">ChatGPT</option>
-      <option value="claude">Claude</option>
-      <option value="gemini">Gemini</option>
+      <option value="all" selected>All models combined</option>
+      <option value="chatgpt">ChatGPT only</option>
+      <option value="claude">Claude only</option>
+      <option value="gemini">Gemini only</option>
     </select>
   </div>
   <div class="ctl">
     <label>Category</label>
     <select id="cat-sel">
       <option value="all" selected>All categories</option>
-      <option value="discovery">Discovery</option>
-      <option value="brand">Brand-specific</option>
-      <option value="competitor">Competitor</option>
-      <option value="product">Product</option>
-      <option value="trust">Trust</option>
+      <option value="discovery">Discovery (customer doesn't know brands)</option>
+      <option value="brand">Brand-specific (asking about B&S)</option>
+      <option value="competitor">Competitor (asking about rivals)</option>
+      <option value="product">Product (buying-intent)</option>
+      <option value="trust">Trust (quality, delivery, reviews)</option>
     </select>
   </div>
-  <button id="run-btn">Run</button>
+  <button id="run-btn">Refresh data</button>
   <div id="status"></div>
 </div>
 
 <main>
   <div class="banner" id="banner"></div>
 
-  <nav class="tabs">
-    <button data-tab="overview" class="on">Overview</button>
-    <button data-tab="prompts">Prompts</button>
-    <button data-tab="competitors">Competitors</button>
-    <button data-tab="claims">Claims log</button>
-  </nav>
+  <div class="view-toggle">
+    <button data-view="exec" class="on">Executive summary</button>
+    <button data-view="detail">Full detail</button>
+    <button data-view="help">Help &amp; guide</button>
+  </div>
 
-  <section class="tabs-panel on" id="pnl-overview">
+  <!-- ══════════════════ EXECUTIVE VIEW ══════════════════ -->
+  <section id="view-exec">
+    <div class="exec-summary" id="exec-summary">
+      <div class="lead">Loading&hellip;</div>
+      <div>Click <strong>Refresh data</strong> to load the latest run.</div>
+    </div>
+
     <div class="kpis">
-      <div class="kpi" style="--kc:var(--m-clicks)"><div class="kl"><span class="dot"></span>Mention rate</div><div class="kv" id="kv-mrate">&ndash;</div><div class="kd" id="kd-mrate"></div></div>
-      <div class="kpi" style="--kc:var(--m-impr)"><div class="kl"><span class="dot"></span>Avg rank when mentioned</div><div class="kv" id="kv-rank">&ndash;</div><div class="kd" id="kd-rank"></div></div>
-      <div class="kpi" style="--kc:var(--m-ctr)"><div class="kl"><span class="dot"></span>Positive sentiment</div><div class="kv" id="kv-sent">&ndash;</div><div class="kd" id="kd-sent"></div></div>
-      <div class="kpi" style="--kc:var(--m-pos)"><div class="kl"><span class="dot"></span>Prompts covered</div><div class="kv" id="kv-cov">&ndash;</div><div class="kd" id="kd-cov"></div></div>
+      <div class="kpi big" style="--kc:var(--m-mention)">
+        <div class="info">?<span class="tt"><strong>Mention rate</strong> is the % of prompts where AI named Barker &amp; Stonehouse directly. Includes brand and trust prompts (where B&amp;S is asked about by name), so headline figure will be flattered. See <em>non-brand mention rate</em> below for the fairer test.</span></div>
+        <div class="kl"><span class="dot"></span>Overall mention rate</div>
+        <div class="kv" id="kv-mention">&ndash;</div>
+        <div class="kd" id="kd-mention"></div>
+        <div class="kh">Of all AI answers, how often B&amp;S was named at all.</div>
+      </div>
+      <div class="kpi big" style="--kc:var(--m-non)">
+        <div class="info">?<span class="tt"><strong>Non-brand mention rate</strong> excludes brand and trust prompts. This is the <strong>fair visibility test</strong>: when a customer asks a generic question (best sofa brands, alternatives to DFS, where to buy an oak dining table), how often does AI think of B&amp;S? This is the KPI to track over time.</span></div>
+        <div class="kl"><span class="dot"></span>Non-brand mention rate</div>
+        <div class="kv" id="kv-non">&ndash;</div>
+        <div class="kd" id="kd-non"></div>
+        <div class="kh">The fair test &mdash; excludes questions naming B&amp;S.</div>
+      </div>
+      <div class="kpi big" style="--kc:var(--m-sov)">
+        <div class="info">?<span class="tt"><strong>Share of voice</strong> is B&amp;S's slice of all brand mentions in AI answers. If AI named 100 furniture brands total and B&amp;S was 8 of them, SoV is 8%.</span></div>
+        <div class="kl"><span class="dot"></span>Share of voice</div>
+        <div class="kv" id="kv-sov">&ndash;</div>
+        <div class="kd" id="kd-sov"></div>
+        <div class="kh">B&amp;S's slice of all furniture brands named.</div>
+      </div>
+      <div class="kpi big" style="--kc:var(--m-sent)">
+        <div class="info">?<span class="tt"><strong>Positive sentiment</strong>: of the times B&amp;S was mentioned, what fraction did AI describe favourably? Above 70% is healthy. Below 50% would signal a serious brand-perception issue.</span></div>
+        <div class="kl"><span class="dot"></span>Positive sentiment</div>
+        <div class="kv" id="kv-sent">&ndash;</div>
+        <div class="kd" id="kd-sent"></div>
+        <div class="kh">How favourably AI describes B&amp;S when named.</div>
+      </div>
     </div>
 
     <div class="card">
-      <h3>Mention rate over time</h3>
-      <div class="hint">% of prompts where B&S was named, by model, per run</div>
-      <div class="chart-h"><canvas id="ch-mtrend"></canvas></div>
+      <h3>Where B&amp;S is strong and where the gaps are</h3>
+      <div class="hint">Mention rate by category. <strong>Low bars are where SEO/content teams should focus</strong> &mdash; those are the questions AI isn't associating with B&amp;S yet.</div>
+      <div class="chart-s" style="height:230px"><canvas id="ch-cat"></canvas></div>
     </div>
 
     <div class="grid2">
       <div class="card">
-        <h3>By category (latest run)</h3>
-        <div class="hint">Where B&S is strong and where the gaps are</div>
-        <div class="chart-s"><canvas id="ch-cat"></canvas></div>
+        <h3>Share of voice: top brands</h3>
+        <div class="hint">Who AI mentions most often across the whole prompt corpus. <strong>B&amp;S is highlighted.</strong> Aim to climb this leaderboard over time.</div>
+        <div class="chart-h" style="height:380px"><canvas id="ch-sov"></canvas></div>
       </div>
       <div class="card">
-        <h3>Sentiment mix (latest run)</h3>
-        <div class="hint">How AI portrays B&S when it mentions us</div>
-        <div class="chart-s"><canvas id="ch-sent"></canvas></div>
+        <h3>Sentiment split</h3>
+        <div class="hint">When AI does mention B&amp;S, how it portrays the brand. Green is healthy, red is a red flag.</div>
+        <div class="chart-s" style="height:260px"><canvas id="ch-sent"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Trend: mention rate over time</h3>
+      <div class="hint">Weekly mention rate by model. Look for consistent upward drift as SEO/AEO efforts land, and watch for sudden drops (may signal an AI provider changed how they source retailer info).</div>
+      <div class="chart-h"><canvas id="ch-trend"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ DETAIL VIEW ══════════════════ -->
+  <section id="view-detail" style="display:none">
+    <nav class="tabs">
+      <button data-tab="prompts" class="on">Every prompt</button>
+      <button data-tab="competitors">Competitor deep-dive</button>
+      <button data-tab="claims">Claims log</button>
+      <button data-tab="gaps">Gap analysis</button>
+    </nav>
+
+    <div class="tabs-panel on" id="pnl-prompts">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Every prompt &middot; latest response summary</h3>
+            <div class="hint"><strong>Click any row</strong> to see the full response from each model side-by-side, plus the claims AI made about B&amp;S. Use the filter to jump to a specific prompt.</div>
+          </div>
+          <div class="tools"><input type="search" id="p-filter" placeholder="Filter prompts&hellip;"><button class="csv-btn" id="prompts-csv">Export CSV</button></div>
+        </div>
+        <div class="tbl-wrap" id="tbl-prompts"></div>
+      </div>
+    </div>
+
+    <div class="tabs-panel" id="pnl-competitors">
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Full share of voice leaderboard</h3>
+            <div class="hint">Every furniture brand AI mentioned across your prompt corpus, ranked by mention count. B&amp;S is highlighted. Also shows average rank &mdash; when AI does list brands, roughly where they land.</div>
+          </div>
+          <div class="tools"><button class="csv-btn" id="comp-csv">Export CSV</button></div>
+        </div>
+        <div class="tbl-wrap" id="tbl-comp"></div>
+      </div>
+    </div>
+
+    <div class="tabs-panel" id="pnl-claims">
+      <div class="card">
+        <h3>Claims the AI made about B&amp;S</h3>
+        <div class="hint">Every factual statement AI made about the brand. <strong>Flagged claims appear first</strong> &mdash; these look wrong to the scorer and should be reviewed. If a claim is repeatedly wrong, the source content (probably a category page or old review site) needs updating so future AI training picks up correct info.</div>
+        <div id="claims-body"></div>
+      </div>
+    </div>
+
+    <div class="tabs-panel" id="pnl-gaps">
+      <div class="card">
+        <h3>Prompts where B&amp;S never appears</h3>
+        <div class="hint">These are the prompts where <strong>no model</strong> mentioned B&amp;S in the latest run. This is your <strong>opportunity list</strong>: each one is a customer question where AI doesn't currently think of B&amp;S. Ordered by category so you can spot patterns.</div>
+        <div class="tbl-wrap" id="tbl-gaps"></div>
       </div>
     </div>
   </section>
 
-  <section class="tabs-panel" id="pnl-prompts">
+  <!-- ══════════════════ HELP VIEW ══════════════════ -->
+  <section id="view-help" style="display:none">
     <div class="card">
-      <div class="card-head">
-        <div><h3>Prompts &amp; latest responses</h3><div class="hint">Click a row to see the full response from each model side-by-side</div></div>
-        <div class="tools"><input type="search" id="p-filter" placeholder="Filter prompts&hellip;"><button class="csv-btn" id="prompts-csv">Export CSV</button></div>
+      <h3>What this dashboard tracks</h3>
+      <div class="help-block">
+        <p>Every Monday morning, a script sends ~100 customer-style questions to <strong>ChatGPT, Claude, and Gemini</strong>, records their answers, and asks Claude to score each response for how it treats Barker &amp; Stonehouse. The results feed this dashboard.</p>
+        <p>The prompts fall into five categories:</p>
+        <ul>
+          <li><strong>Discovery</strong> &mdash; the customer doesn't know which brand to buy yet ("best UK sofa brands", "where to buy quality dining tables"). This is where B&amp;S needs to surface if AI is going to bring in new customers.</li>
+          <li><strong>Brand-specific</strong> &mdash; the customer already knows B&amp;S ("is Barker and Stonehouse good quality"). Almost always mentions us, so mention rate here is a distraction.</li>
+          <li><strong>Competitor</strong> &mdash; the question centres on a rival ("alternatives to DFS", "John Lewis vs Barker &amp; Stonehouse"). Are we being suggested as an alternative?</li>
+          <li><strong>Product</strong> &mdash; buying-intent questions ("best leather sofa under &pound;3000", "Ercol dining table UK").</li>
+          <li><strong>Trust</strong> &mdash; friction points ("is Barker &amp; Stonehouse trustworthy", "delivery complaints"). Sentiment matters here more than mention rate.</li>
+        </ul>
       </div>
-      <div class="tbl-wrap" id="tbl-prompts"></div>
     </div>
-  </section>
 
-  <section class="tabs-panel" id="pnl-competitors">
     <div class="card">
-      <div class="card-head">
-        <div><h3>Share of voice</h3><div class="hint">Which retailers get mentioned most across the prompt corpus, latest run</div></div>
-        <div class="tools"><button class="csv-btn" id="comp-csv">Export CSV</button></div>
+      <h3>Which numbers should I watch?</h3>
+      <div class="help-block">
+        <h4>The five headline KPIs</h4>
+        <ul>
+          <li><strong>Overall mention rate</strong> &mdash; broadest measure, but includes brand and trust prompts (where B&amp;S is asked about by name). Good for a headline but flattered by definition.</li>
+          <li><strong>Non-brand mention rate</strong> &mdash; the fair test. Excludes brand/trust prompts, leaving discovery + competitor + product. If AI is genuinely thinking of B&amp;S when customers don't already know the name, this number moves.</li>
+          <li><strong>Share of voice</strong> &mdash; B&amp;S's slice of all furniture brand mentions AI made. If AI named 100 brands and 8 were B&amp;S, SoV is 8%. Compare against known market leaders like DFS/John Lewis.</li>
+          <li><strong>Positive sentiment</strong> &mdash; when B&amp;S <em>is</em> mentioned, how favourably. Above 70% is healthy for premium retail.</li>
+          <li><strong>Avg rank when mentioned</strong> &mdash; if AI gives a numbered list, where does B&amp;S land? #1&ndash;3 is prime real estate.</li>
+        </ul>
+        <h4>What "good" looks like</h4>
+        <p>Baseline benchmarks for a regional premium retailer:</p>
+        <ul>
+          <li>Non-brand mention rate 30&ndash;50% &mdash; solid; below 20% suggests a discoverability problem</li>
+          <li>Share of voice 5&ndash;10% &mdash; strong for a regional player; DFS/John Lewis will likely be 15&ndash;25%</li>
+          <li>Positive sentiment 70&ndash;85% &mdash; healthy; below 60% needs investigation</li>
+          <li>Avg rank 2&ndash;4 &mdash; you're in the consideration set</li>
+        </ul>
       </div>
-      <div class="chart-h" style="height:400px"><canvas id="ch-comp"></canvas></div>
     </div>
-  </section>
 
-  <section class="tabs-panel" id="pnl-claims">
     <div class="card">
-      <h3>Notable claims about B&S</h3>
-      <div class="hint">Every factual claim the AIs made about B&S in the selected window. Claims flagged as inaccurate by the scorer appear at the top.</div>
-      <div id="claims-body"></div>
+      <h3>How to use this dashboard</h3>
+      <div class="help-block">
+        <h4>Weekly check (5 minutes)</h4>
+        <p>Open the <strong>Executive summary</strong>, hit Refresh data, and eyeball the four headline KPIs. Look for arrows: any big movement week-on-week deserves a look. Skim the category chart &mdash; where's the weakest bar?</p>
+        <h4>Deep review (20 minutes, monthly)</h4>
+        <ol style="padding-left:22px;margin:6px 0">
+          <li>Executive summary &rarr; check trends and headline direction</li>
+          <li>Full detail &rarr; <strong>Gap analysis</strong>: which specific prompts are we invisible on? Feed to SEO/content.</li>
+          <li>Full detail &rarr; <strong>Claims log</strong>: any red claims? These are website-content issues to fix.</li>
+          <li>Full detail &rarr; <strong>Every prompt</strong>: pick 3-4 rows, open the drawer, read the actual responses. That's how you understand what AI is saying about the brand.</li>
+        </ol>
+        <h4>Filtering</h4>
+        <p>The three dropdowns at the top narrow the whole dashboard:</p>
+        <ul>
+          <li><strong>Look back</strong> &mdash; latest run only for a snapshot, or last 4-26 runs for trends</li>
+          <li><strong>Model</strong> &mdash; useful for spotting when one AI provider treats you very differently from the others</li>
+          <li><strong>Category</strong> &mdash; drill into a single prompt type</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Answers for James</h3>
+      <div class="help-block">
+        <p>The three sentences to lead with each month:</p>
+        <ol style="padding-left:22px">
+          <li>"AI mentions B&amp;S in <strong>X% of non-brand searches</strong>, [up/down] Y percentage points vs last month."</li>
+          <li>"We rank <strong>[N]</strong> in furniture share-of-voice, ahead of [competitor A] but behind [competitor B]."</li>
+          <li>"The three biggest opportunities are [category] &mdash; where we're mentioned in only Z% of relevant answers &mdash; and [specific claim] which needs correcting on our category pages."</li>
+        </ol>
+        <p>Everything on the dashboard supports one of those three sentences.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Caveats</h3>
+      <div class="help-block">
+        <p><strong>Sample size:</strong> ~100 prompts is not a scientific sample of every possible customer question. It's a curated corpus. Add or remove prompts in <code>prompts.yaml</code> in the GitHub repo &mdash; the runner picks up changes on the next Monday.</p>
+        <p><strong>Model drift:</strong> AI providers change their models. When gpt-5 or claude-opus-5 lands, the numbers may shift as much from model behaviour change as from real-world change. That's why we track by model.</p>
+        <p><strong>Scoring reliability:</strong> Claude scores every response. It's mostly right but occasionally miscategorises sentiment or misses a mention buried in prose. Sanity-check by clicking through actual responses in the Every prompt tab.</p>
+        <p><strong>Not causal:</strong> A mention rate going up doesn't automatically mean more revenue. It means AI is aware of B&amp;S. Correlate with the LLM traffic dashboard (<code>bs-llm</code>) to see if awareness turns into visits.</p>
+      </div>
     </div>
   </section>
 
-  <footer>Data: BigQuery <span id="ft-ds"></span> &middot; runs weekly Mondays 06:00 UTC</footer>
+  <footer>Data: BigQuery <span id="ft-ds"></span> &middot; runs weekly Mondays 06:00 UTC &middot; <a href="https://github.com/dlawrence-BandS/bs-ai-visibility" target="_blank" rel="noopener" style="color:var(--mut)">source</a></footer>
 </main>
 
-<!-- Drawer for prompt drilldown -->
+<!-- Drawer -->
 <div id="drawer-bg"></div>
 <div id="drawer">
   <div class="drawer-head">
@@ -318,7 +440,7 @@ a.ext:hover{color:var(--m-clicks)}
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
     <h2>Connection</h2>
-    <p>This dashboard queries BigQuery directly with your Google account. No key files.</p>
+    <p>Queries BigQuery directly using your Google account. No key files stored.</p>
     <div class="field"><label>Signed-in status</label><div id="key-state" style="padding:6px 0"></div></div>
     <div class="row">
       <span class="sp"></span>
@@ -336,17 +458,23 @@ const CLIENT_ID = '46227372300-rk63ag0caqgd7n12gjd0nt7f2qi7llqr.apps.googleuserc
 const LS_AUTH = 'aiv_google_auth', LS_LOC = 'aiv_bq_location';
 document.getElementById('ft-ds').textContent = PROJECT + '.' + DATASET;
 
+// Brand/trust categories are excluded from "non-brand" mention rate
+const NON_BRAND_CATS = ['discovery','competitor','product'];
+const CAT_LABELS = {discovery:'Discovery', brand:'Brand-specific', competitor:'Competitor', product:'Product', trust:'Trust'};
+const MODEL_COLORS = {chatgpt:'#a8814f', claude:'#3d5747', gemini:'#5b7085'};
+
 /* ═══════ STATE ═══════ */
 let accessToken = null, tokenExpiry = 0;
 let hasGrant = !!localStorage.getItem(LS_AUTH);
 let D = {};
 let charts = {};
 let promptFilter = '';
+let sortState = {promptsTab: {key:'category',dir:'asc'}, compTab: {key:'mentions',dir:'desc'}};
 
 /* ═══════ HELPERS ═══════ */
 const $ = id => document.getElementById(id);
-const fmt = n => n==null||isNaN(n) ? '–' : Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+'M' : Math.abs(n)>=10000 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toLocaleString('en-GB');
-const pct = n => n==null||isNaN(n) ? '–' : (n*100).toFixed(n*100>=10?1:2)+'%';
+const fmt = n => n==null||isNaN(n) ? '\u2013' : Math.abs(n)>=1e6 ? (n/1e6).toFixed(2)+'M' : Math.abs(n)>=10000 ? (n/1e3).toFixed(1)+'k' : Math.round(n).toLocaleString('en-GB');
+const pct = n => n==null||isNaN(n) ? '\u2013' : (n*100).toFixed(n*100>=10?1:2)+'%';
 const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const iso = d => d.toISOString().slice(0,10);
 function setStatus(msg, err=false){ const s=$('status'); s.textContent=msg; s.className = err?'err':''; }
@@ -354,8 +482,9 @@ function showBanner(msg, isErr=false){ const b=$('banner'); b.innerHTML=msg; b.c
 function hideBanner(){ $('banner').className='banner'; }
 function mkChart(id, cfg){ if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id), cfg); return charts[id]; }
 function sentClass(s){ return {positive:'sent-pos', negative:'sent-neg', neutral:'sent-neu', mixed:'sent-mix'}[s] || 'sent-neu'; }
+function isBS(name){ if (!name) return false; const n = String(name).toLowerCase(); return n.includes('barker') && n.includes('stone'); }
 
-/* ═══════ AUTH ═══════ */
+/* ═══════ AUTH (Google GIS) ═══════ */
 let tokenClient = null, tokenPending = null, tokenInFlight = null;
 function initTokenClient(){
   tokenClient = google.accounts.oauth2.initTokenClient({
@@ -388,9 +517,8 @@ async function getToken(){
   if (!tokenClient) initTokenClient();
   if (tokenInFlight) return tokenInFlight;
   tokenInFlight = (async () => {
-    try {
-      if (hasGrant){ try { return await requestToken(''); } catch(e){} }
-      return await requestToken('consent');
+    try { if (hasGrant){ try { return await requestToken(''); } catch(e){} }
+          return await requestToken('consent');
     } finally { tokenInFlight = null; }
   })();
   return tokenInFlight;
@@ -409,12 +537,7 @@ function parseVal(v, type){
   if (type === 'INTEGER' || type === 'INT64') return parseInt(v, 10);
   if (type === 'FLOAT' || type === 'FLOAT64' || type === 'NUMERIC') return parseFloat(v);
   if (type === 'BOOLEAN' || type === 'BOOL') return v === 'true' || v === true;
-  if (type === 'RECORD' || type === 'STRUCT') return parseStruct(v);
   return v;
-}
-function parseStruct(cell){
-  // Placeholder — for our schema we handle repeated STRUCTs manually in parseRows
-  return cell;
 }
 function parseRows(schema, rows){
   const fields = schema.fields;
@@ -445,17 +568,15 @@ async function runQuery(sql){
   const locations = [localStorage.getItem(LS_LOC), 'europe-west2', 'EU', 'US'].filter((v,i,a) => v && a.indexOf(v)===i);
   let lastErr = null;
   for (const loc of locations){
-    console.log('[BQ] Trying:', loc);
     const body = {query: sql, useLegacySql:false, timeoutMs:90000, maxResults:10000, location: loc};
     let res;
     try {
-      const resp = await fetch(`https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT}/queries`, {
+      const resp = await fetch('https://bigquery.googleapis.com/bigquery/v2/projects/'+PROJECT+'/queries', {
         method:'POST', headers:{'Authorization':'Bearer '+token, 'Content-Type':'application/json'}, body:JSON.stringify(body)});
       res = await resp.json();
     } catch(err){ lastErr = err; continue; }
     if (res.error){
       lastErr = new Error(res.error.message);
-      console.warn('[BQ] Error @'+loc+':', res.error.message);
       if (/not found|location|dataset/i.test(res.error.message)) continue;
       throw lastErr;
     }
@@ -466,11 +587,10 @@ async function runQuery(sql){
       polls++;
       if (polls > 90) throw new Error('Query timed out');
       await new Promise(r => setTimeout(r, 1500));
-      const jr = await fetch(`https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT}/queries/${res.jobReference.jobId}?maxResults=10000&location=${res.jobReference.location||loc}`, {headers:{'Authorization':'Bearer '+token}});
+      const jr = await fetch('https://bigquery.googleapis.com/bigquery/v2/projects/'+PROJECT+'/queries/'+res.jobReference.jobId+'?maxResults=10000&location='+(res.jobReference.location||loc), {headers:{'Authorization':'Bearer '+token}});
       out = await jr.json();
       if (out.error) throw new Error(out.error.message);
     }
-    console.log('[BQ] Complete @'+loc, 'rows:', out.totalRows);
     return parseRows(out.schema, out.rows);
   }
   throw lastErr || new Error('Query failed in all regions');
@@ -481,56 +601,33 @@ function buildSQL(){
   const preset = $('preset').value;
   const model  = $('model-sel').value;
   const cat    = $('cat-sel').value;
-  const modelF = model==='all' ? '' : "AND r.model='"+model+"'";
-  const catF   = cat==='all'   ? '' : "AND r.category='"+cat+"'";
+  const modelF = model==='all' ? '' : "AND model='"+model+"'";
+  const catF   = cat==='all'   ? '' : "AND category='"+cat+"'";
 
   const TR = "`"+PROJECT+"."+DATASET+".runs`";
   const TA = "`"+PROJECT+"."+DATASET+".analysis`";
 
+  // Latest = single most recent run_timestamp (all 3 models share it)
   const runsFilter = preset==='latest'
     ? "run_timestamp = (SELECT MAX(run_timestamp) FROM "+TR+")"
     : "run_date IN (SELECT run_date FROM (SELECT DISTINCT run_date FROM "+TR+" ORDER BY run_date DESC LIMIT "+parseInt(preset,10)+"))";
 
   return {
-    kpis:
-      "SELECT r.run_date, r.model, r.category, r.prompt_id, "+
-      "a.bs_mentioned, a.bs_rank, a.bs_sentiment "+
+    // Core: everything per row, we compute KPIs client-side to avoid multiple queries
+    core:
+      "SELECT r.run_date, r.run_timestamp, r.model, r.category, r.prompt_id, r.prompt_text, r.response_text, "+
+      "a.bs_mentioned, a.bs_rank, a.bs_sentiment, a.bs_sentiment_reason, a.competitors, a.key_claims, a.claim_flags "+
       "FROM "+TR+" r "+
       "LEFT JOIN "+TA+" a USING (run_timestamp, model, prompt_id) "+
-      "WHERE r."+runsFilter+" "+modelF+" "+catF+" "+
+      "WHERE r."+runsFilter+" "+modelF.replace(/model=/, 'r.model=')+" "+catF.replace(/category=/, 'r.category=')+" "+
       "AND r.error IS NULL",
+    // Trend: 26 weeks by model regardless of the top filter (for the exec view chart)
     trend:
       "SELECT r.run_date, r.model, COUNT(*) prompts, COUNTIF(a.bs_mentioned) mentions "+
-      "FROM "+TR+" r "+
-      "LEFT JOIN "+TA+" a USING (run_timestamp, model, prompt_id) "+
+      "FROM "+TR+" r LEFT JOIN "+TA+" a USING (run_timestamp, model, prompt_id) "+
       "WHERE r.run_date >= DATE_SUB((SELECT MAX(run_date) FROM "+TR+"), INTERVAL 180 DAY) "+
-      "AND r.error IS NULL "+catF+" "+
-      "GROUP BY 1, 2 ORDER BY 1, 2",
-    prompts:
-      "SELECT r.prompt_id, r.prompt_text, r.category, r.model, r.response_text, "+
-      "a.bs_mentioned, a.bs_rank, a.bs_sentiment, a.bs_sentiment_reason, "+
-      "a.competitors, a.key_claims, a.claim_flags, a.all_citations "+
-      "FROM "+TR+" r "+
-      "LEFT JOIN "+TA+" a USING (run_timestamp, model, prompt_id) "+
-      "WHERE r."+runsFilter+" "+modelF+" "+catF+" AND r.error IS NULL "+
-      "ORDER BY r.category, r.prompt_id, r.model",
-    competitors:
-      "SELECT c.name k, COUNT(*) mentions "+
-      "FROM "+TA+" a, UNNEST(a.competitors) c "+
-      "WHERE a."+runsFilter+" "+(modelF.replace(/AND r\./, 'AND a.'))+" "+(catF.replace(/AND r\./, 'AND a.'))+" "+
-      "GROUP BY 1 ORDER BY 2 DESC LIMIT 30",
-    claims:
-      "SELECT r.run_date, r.model, r.prompt_id, r.prompt_text, claim, TRUE flagged "+
-      "FROM "+TR+" r "+
-      "JOIN "+TA+" a USING (run_timestamp, model, prompt_id), UNNEST(a.claim_flags) claim "+
-      "WHERE r."+runsFilter+" "+modelF+" "+catF+" "+
-      "UNION ALL "+
-      "SELECT r.run_date, r.model, r.prompt_id, r.prompt_text, claim, FALSE flagged "+
-      "FROM "+TR+" r "+
-      "JOIN "+TA+" a USING (run_timestamp, model, prompt_id), UNNEST(a.key_claims) claim "+
-      "WHERE r."+runsFilter+" "+modelF+" "+catF+" "+
-      "AND claim NOT IN (SELECT f FROM UNNEST(a.claim_flags) f) "+
-      "ORDER BY flagged DESC, run_date DESC LIMIT 200"
+      "AND r.error IS NULL "+catF.replace(/category=/, 'r.category=')+" "+
+      "GROUP BY 1,2 ORDER BY 1,2"
   };
 }
 
@@ -543,9 +640,9 @@ async function loadAll(){
     const sql = buildSQL();
     const keys = Object.keys(sql);
     let done = 0;
-    setStatus(`Loading… 0/${keys.length}`);
+    setStatus('Loading\u2026 0/'+keys.length);
     const results = await Promise.all(keys.map(k =>
-      runQuery(sql[k]).then(rows => { setStatus(`Loading… ${++done}/${keys.length}`); return [k, rows]; })
+      runQuery(sql[k]).then(rows => { setStatus('Loading\u2026 '+(++done)+'/'+keys.length); return [k, rows]; })
     ));
     D = Object.fromEntries(results);
     renderAll();
@@ -553,90 +650,144 @@ async function loadAll(){
   } catch(e){
     console.error(e);
     setStatus('Query failed', true);
-    showBanner('<strong>Error:</strong> ' + esc(e.message) + '<br>If this mentions permissions, your account needs BigQuery Data Viewer + Job User on the project. If nothing has been run yet, the tables will be empty until the first weekly cron completes.', true);
+    showBanner('<strong>Error:</strong> '+esc(e.message)+'<br>If this mentions permissions, your account needs BigQuery Data Viewer + Job User on the project. If tables are empty, wait for the first weekly cron to complete.', true);
   }
   $('run-btn').disabled = false;
 }
 
 /* ═══════ RENDER ═══════ */
-const MODEL_COLORS = {chatgpt:'#a8814f', claude:'#3d5747', gemini:'#5b7085'};
-const CAT_LABELS   = {discovery:'Discovery', brand:'Brand-specific', competitor:'Competitor', product:'Product', trust:'Trust'};
-
 function renderAll(){
+  computeKPIs();
+  renderExecSummary();
   renderKPIs();
-  renderMTrend();
-  renderCat();
+  renderCategoryChart();
+  renderSoV();
   renderSent();
-  renderPrompts();
-  renderComp();
+  renderTrend();
+  renderPromptsTable();
+  renderCompTable();
   renderClaims();
-  const runs = new Set(D.kpis.map(r=>r.run_date));
-  const latest = runs.size ? [...runs].sort().pop() : null;
-  $('fresh-pill').textContent = 'Latest run: ' + (latest || '–');
+  renderGaps();
+  const latest = D.core.length ? [...new Set(D.core.map(r=>r.run_date))].sort().pop() : null;
+  $('fresh-pill').textContent = 'Latest run: ' + (latest || '\u2013');
+  $('mention-pill').textContent = 'Mention rate: ' + (D.mrate!=null ? pct(D.mrate) : '\u2013');
+}
+
+function computeKPIs(){
+  const rows = D.core || [];
+  const total = rows.length;
+  const mentioned = rows.filter(r=>r.bs_mentioned).length;
+  D.mrate = total ? mentioned/total : null;
+
+  const nonBrand = rows.filter(r => NON_BRAND_CATS.includes(r.category));
+  const nonBrandMentioned = nonBrand.filter(r=>r.bs_mentioned).length;
+  D.nonRate = nonBrand.length ? nonBrandMentioned/nonBrand.length : null;
+
+  // Share of voice: B&S mentions / total brand mentions (across all prompts in scope)
+  let bsCount = 0, totalCount = 0;
+  rows.forEach(r => {
+    if (r.bs_mentioned) bsCount++;
+    (r.competitors||[]).forEach(c => { if (c.name) totalCount++; });
+  });
+  totalCount += bsCount;
+  D.sov = totalCount ? bsCount/totalCount : null;
+
+  const mentions = rows.filter(r=>r.bs_mentioned);
+  const pos = mentions.filter(r=>r.bs_sentiment==='positive').length;
+  D.posRate = mentions.length ? pos/mentions.length : null;
+
+  const ranks = rows.filter(r=>r.bs_mentioned && r.bs_rank).map(r=>r.bs_rank);
+  D.avgRank = ranks.length ? ranks.reduce((a,b)=>a+b,0)/ranks.length : null;
+  D.rankCount = ranks.length;
+
+  D.responseCount = total;
+  D.mentionCount = mentioned;
+  D.nonBrandCount = nonBrand.length;
+  D.nonBrandMentions = nonBrandMentioned;
+  D.mentionsForSentiment = mentions.length;
+  D.posCount = pos;
+  D.bsBrandCount = bsCount;
+  D.allBrandCount = totalCount;
+}
+
+function renderExecSummary(){
+  if (!D.core || !D.core.length){
+    $('exec-summary').innerHTML = '<div class="lead">No data yet</div><div>Run the workflow at least once, then click Refresh data.</div>';
+    return;
+  }
+  const nonPct = D.nonRate!=null ? pct(D.nonRate) : '\u2013';
+  const sovPct = D.sov!=null ? pct(D.sov) : '\u2013';
+  const posPct = D.posRate!=null ? pct(D.posRate) : '\u2013';
+  const nonVerdict = D.nonRate == null ? '' :
+    D.nonRate >= 0.5 ? 'a strong result' :
+    D.nonRate >= 0.3 ? 'a healthy baseline' :
+    D.nonRate >= 0.15 ? 'below the healthy threshold and worth focusing on' :
+    'a significant visibility gap';
+  const sentVerdict = D.posRate == null ? '' :
+    D.posRate >= 0.7 ? 'a healthy tone' :
+    D.posRate >= 0.5 ? 'a mixed picture' :
+    'a red flag &mdash; investigate the negative-sentiment mentions in the detail view';
+
+  $('exec-summary').innerHTML =
+    '<div class="lead">AI names B&amp;S in <strong>'+nonPct+'</strong> of relevant (non-brand) customer questions</div>'+
+    '<div>Across '+D.responseCount+' AI responses this run, Barker &amp; Stonehouse held <strong>'+sovPct+' share of voice</strong> against all named furniture retailers. Where B&amp;S is mentioned, AI describes the brand favourably <strong>'+posPct+'</strong> of the time &mdash; '+sentVerdict+'. The non-brand mention rate is '+nonVerdict+'.</div>';
 }
 
 function renderKPIs(){
-  const rows = D.kpis || [];
-  const total = rows.length;
-  const mentioned = rows.filter(r=>r.bs_mentioned).length;
-  const mrate = total ? mentioned/total : null;
-  const ranks = rows.filter(r=>r.bs_mentioned && r.bs_rank).map(r=>r.bs_rank);
-  const avgRank = ranks.length ? ranks.reduce((a,b)=>a+b,0)/ranks.length : null;
-  const pos = rows.filter(r=>r.bs_sentiment==='positive').length;
-  const posRate = mentioned ? pos/mentioned : null;
-  const prompts = new Set(rows.filter(r=>r.bs_mentioned).map(r=>r.prompt_id)).size;
-  const allPrompts = new Set(rows.map(r=>r.prompt_id)).size;
-
-  $('kv-mrate').textContent = pct(mrate);
-  $('kd-mrate').textContent = `${mentioned}/${total} responses`;
-  $('kv-rank').textContent = avgRank ? avgRank.toFixed(1) : '–';
-  $('kd-rank').textContent = ranks.length ? `${ranks.length} ranked mentions` : '';
-  $('kv-sent').textContent = pct(posRate);
-  $('kd-sent').textContent = mentioned ? `${pos}/${mentioned} mentions` : '';
-  $('kv-cov').textContent = allPrompts ? `${prompts}/${allPrompts}` : '–';
-  $('kd-cov').textContent = 'distinct prompts';
-
-  $('mention-pill').textContent = 'Mention rate: ' + pct(mrate);
+  const set=(k,v,d)=>{ $('kv-'+k).textContent = v; $('kd-'+k).innerHTML = d; };
+  set('mention', pct(D.mrate), D.mentionCount+' / '+D.responseCount+' responses');
+  set('non', pct(D.nonRate), D.nonBrandMentions+' / '+D.nonBrandCount+' non-brand responses');
+  set('sov', pct(D.sov), D.bsBrandCount+' of '+D.allBrandCount+' brand mentions');
+  set('sent', pct(D.posRate), D.posCount+' of '+D.mentionsForSentiment+' mentions positive');
 }
 
-function renderMTrend(){
-  const rows = D.trend || [];
-  const dates = [...new Set(rows.map(r=>r.run_date))].sort();
-  const models = ['chatgpt','claude','gemini'];
-  const ds = models.map(m => ({
-    label: m.charAt(0).toUpperCase()+m.slice(1),
-    data: dates.map(d => {
-      const r = rows.find(x => x.run_date===d && x.model===m);
-      return r && r.prompts ? r.mentions/r.prompts : null;
-    }),
-    borderColor: MODEL_COLORS[m], backgroundColor: MODEL_COLORS[m]+'22',
-    borderWidth:2, pointRadius:3, tension:.25, spanGaps:true
-  }));
-  mkChart('ch-mtrend', {type:'line', data:{labels:dates, datasets:ds},
-    options:{responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}},
-        tooltip:{callbacks:{label:c=>c.dataset.label+': '+pct(c.parsed.y)}}},
-      scales:{x:{grid:{display:false}, ticks:{color:'#98907d', font:{size:11}}},
-              y:{beginAtZero:true, max:1, ticks:{callback:v=>pct(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}}}}});
-}
-
-function renderCat(){
-  const rows = D.kpis || [];
-  const cats = ['discovery','brand','competitor','product','trust'];
+function renderCategoryChart(){
+  const rows = D.core || [];
+  const cats = ['discovery','competitor','product','brand','trust'];
   const data = cats.map(c => {
     const r = rows.filter(x => x.category===c);
     return r.length ? r.filter(x=>x.bs_mentioned).length / r.length : 0;
   });
   mkChart('ch-cat', {type:'bar', data:{labels:cats.map(c=>CAT_LABELS[c]),
-    datasets:[{data, backgroundColor:'#a8814f', borderRadius:3}]},
+    datasets:[{data, backgroundColor:cats.map(c => NON_BRAND_CATS.includes(c) ? '#a8814f' : '#c9bfa8'), borderRadius:3}]},
     options:{responsive:true, maintainAspectRatio:false, indexAxis:'y',
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'Mention rate: '+pct(c.parsed.x)}}},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{
+        label:c=>'Mention rate: '+pct(c.parsed.x),
+        afterLabel:c=>NON_BRAND_CATS.includes(cats[c.dataIndex]) ? '' : '(brand/trust categories included \u2014 flattered by design)'
+      }}},
       scales:{x:{beginAtZero:true, max:1, ticks:{callback:v=>pct(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}},
               y:{ticks:{color:'#27231c', font:{size:12}}, grid:{display:false}}}}});
 }
 
+function renderSoV(){
+  // Aggregate all brand mentions (competitors + B&S) into one ranked list
+  const rows = D.core || [];
+  const counts = {};
+  rows.forEach(r => {
+    if (r.bs_mentioned) counts['Barker & Stonehouse'] = (counts['Barker & Stonehouse']||0) + 1;
+    (r.competitors||[]).forEach(c => {
+      if (!c.name) return;
+      // Normalise name — Title Case, strip duplicates
+      const n = c.name.trim();
+      if (isBS(n)) counts['Barker & Stonehouse'] = (counts['Barker & Stonehouse']||0) + 1;
+      else counts[n] = (counts[n]||0) + 1;
+    });
+  });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const bg = sorted.map(([k]) => isBS(k) ? '#a8814f' : '#3d5747');
+  mkChart('ch-sov', {type:'bar', data:{labels:sorted.map(([k])=>k),
+    datasets:[{data:sorted.map(([,v])=>v), backgroundColor:bg, borderRadius:3}]},
+    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.x+' mentions'}}},
+      scales:{x:{beginAtZero:true, ticks:{color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}},
+              y:{ticks:{color:'#27231c', font:{size:12}, callback:function(v){
+                const label=this.getLabelForValue(v);
+                return isBS(label) ? label + '  \u25c0' : label;
+              }}, grid:{display:false}}}}});
+}
+
 function renderSent(){
-  const rows = (D.kpis||[]).filter(r=>r.bs_mentioned);
+  const rows = (D.core||[]).filter(r=>r.bs_mentioned);
   const counts = {positive:0, neutral:0, mixed:0, negative:0};
   rows.forEach(r => { if (counts[r.bs_sentiment]!==undefined) counts[r.bs_sentiment]++; });
   mkChart('ch-sent', {type:'doughnut', data:{labels:['Positive','Neutral','Mixed','Negative'],
@@ -645,131 +796,258 @@ function renderSent(){
       plugins:{legend:{position:'right', labels:{boxWidth:12, font:{size:11}}}}}});
 }
 
-function renderPrompts(){
+function renderTrend(){
+  const rows = D.trend || [];
+  const dates = [...new Set(rows.map(r=>r.run_date))].sort();
+  const models = ['chatgpt','claude','gemini'];
+  const ds = models.map(m => ({
+    label: m.charAt(0).toUpperCase()+m.slice(1),
+    data: dates.map(d => { const r = rows.find(x => x.run_date===d && x.model===m); return r && r.prompts ? r.mentions/r.prompts : null; }),
+    borderColor: MODEL_COLORS[m], backgroundColor: MODEL_COLORS[m]+'22',
+    borderWidth:2, pointRadius:3, tension:.25, spanGaps:true
+  }));
+  mkChart('ch-trend', {type:'line', data:{labels:dates, datasets:ds},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+pct(c.parsed.y)}}},
+      scales:{x:{grid:{display:false}, ticks:{color:'#98907d', font:{size:11}}},
+              y:{beginAtZero:true, max:1, ticks:{callback:v=>pct(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}}}}});
+}
+
+/* ═════ DETAIL TAB: PROMPTS TABLE ═════ */
+function renderPromptsTable(){
   const f = promptFilter.toLowerCase();
-  // Latest response per prompt+model
-  const rows = (D.prompts||[]).filter(r =>
-    !f || (r.prompt_text||'').toLowerCase().includes(f) || (r.prompt_id||'').toLowerCase().includes(f));
-  // Group by prompt
+  const rows = (D.core||[]).filter(r => !f || (r.prompt_text||'').toLowerCase().includes(f) || (r.prompt_id||'').toLowerCase().includes(f));
   const byPrompt = {};
   rows.forEach(r => {
     if (!byPrompt[r.prompt_id]) byPrompt[r.prompt_id] = {id:r.prompt_id, text:r.prompt_text, category:r.category, models:{}};
     byPrompt[r.prompt_id].models[r.model] = r;
   });
-  const list = Object.values(byPrompt);
+  let list = Object.values(byPrompt);
+
+  // Sort
+  const sk = sortState.promptsTab.key, sd = sortState.promptsTab.dir;
+  list.sort((a,b) => {
+    let av, bv;
+    if (sk === 'category'){ av = a.category; bv = b.category; }
+    else if (sk === 'prompt'){ av = a.text; bv = b.text; }
+    else if (sk === 'coverage'){ av = Object.values(a.models).filter(x=>x.bs_mentioned).length; bv = Object.values(b.models).filter(x=>x.bs_mentioned).length; }
+    else return 0;
+    if (av < bv) return sd==='asc' ? -1 : 1;
+    if (av > bv) return sd==='asc' ? 1 : -1;
+    return 0;
+  });
+
   const models = ['chatgpt','claude','gemini'];
+  const arrow = k => sk===k ? (sd==='asc'?' asc':' desc') : '';
+  $('tbl-prompts').innerHTML = list.length ? '<table><thead><tr>'+
+    '<th class="txt srt'+arrow('prompt')+'" data-sort="prompt">Prompt</th>'+
+    '<th class="txt srt'+arrow('category')+'" data-sort="category">Category</th>'+
+    '<th class="srt'+arrow('coverage')+'" data-sort="coverage">B&amp;S in</th>'+
+    models.map(m => '<th>'+m.charAt(0).toUpperCase()+m.slice(1)+'</th>').join('')+
+    '</tr></thead><tbody>' +
+    list.map(p => {
+      const covered = Object.values(p.models).filter(x=>x.bs_mentioned).length;
+      const total = Object.values(p.models).length;
+      return '<tr class="prompt-row" data-pid="'+esc(p.id)+'">'+
+        '<td class="txt">'+esc(p.text)+'</td>'+
+        '<td class="txt"><span class="mut">'+(CAT_LABELS[p.category]||p.category)+'</span></td>'+
+        '<td>'+covered+' / '+total+'</td>'+
+        models.map(m => {
+          const r = p.models[m];
+          if (!r) return '<td><span class="mut">&ndash;</span></td>';
+          if (!r.bs_mentioned) return '<td><span class="badge miss">not named</span></td>';
+          return '<td><span class="badge ok">'+(r.bs_rank?'#'+r.bs_rank:'named')+'</span> <span class="'+sentClass(r.bs_sentiment)+'" style="font-size:11.5px;margin-left:4px">'+(r.bs_sentiment||'')+'</span></td>';
+        }).join('')+'</tr>';
+    }).join('') + '</tbody></table>' : '<div class="empty">No prompts match the filter</div>';
 
-  $('tbl-prompts').innerHTML = list.length ? `<table><thead><tr>
-    <th class="txt">Prompt</th>
-    <th class="txt">Category</th>
-    ${models.map(m=>`<th>${m.charAt(0).toUpperCase()+m.slice(1)}</th>`).join('')}
-  </tr></thead><tbody>` +
-    list.map(p => `<tr class="prompt-row" data-pid="${esc(p.id)}">
-      <td class="txt">${esc(p.text)}</td>
-      <td class="txt"><span class="mut">${CAT_LABELS[p.category]||p.category}</span></td>
-      ${models.map(m => {
-        const r = p.models[m];
-        if (!r) return '<td><span class="mut">&ndash;</span></td>';
-        if (!r.bs_mentioned) return '<td><span class="badge miss">not mentioned</span></td>';
-        return `<td><span class="badge ok">${r.bs_rank?'#'+r.bs_rank:'named'}</span> <span class="${sentClass(r.bs_sentiment)}">${r.bs_sentiment||'–'}</span></td>`;
-      }).join('')}
-    </tr>`).join('') +
-    '</tbody></table>' : '<div class="empty">No prompts match the filter</div>';
-
-  // Wire row clicks
-  document.querySelectorAll('.prompt-row').forEach(tr => tr.addEventListener('click', () => openDrawer(tr.dataset.pid)));
+  document.querySelectorAll('#tbl-prompts .prompt-row').forEach(tr => tr.addEventListener('click', () => openDrawer(tr.dataset.pid)));
+  document.querySelectorAll('#tbl-prompts th.srt').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.sort;
+    if (sortState.promptsTab.key === k) sortState.promptsTab.dir = sortState.promptsTab.dir==='asc'?'desc':'asc';
+    else { sortState.promptsTab.key = k; sortState.promptsTab.dir = 'asc'; }
+    renderPromptsTable();
+  }));
 }
 
 function openDrawer(pid){
-  const rows = (D.prompts||[]).filter(r => r.prompt_id === pid);
+  const rows = (D.core||[]).filter(r => r.prompt_id === pid);
   if (!rows.length) return;
   const p = rows[0];
-  $('dr-type').textContent = 'PROMPT · ' + (CAT_LABELS[p.category]||p.category).toUpperCase();
+  $('dr-type').textContent = 'PROMPT \u00b7 ' + (CAT_LABELS[p.category]||p.category).toUpperCase();
   $('dr-title').textContent = p.prompt_text;
   const models = ['chatgpt','claude','gemini'];
-  $('dr-body').innerHTML = `<div class="grid3">` +
+  $('dr-body').innerHTML = '<div class="grid3" style="padding:0 16px">' +
     models.map(m => {
       const r = rows.find(x => x.model === m);
-      if (!r) return `<div class="model-col"><h4>${m}</h4><p class="mut">no data</p></div>`;
-      const cmps = (r.competitors||[]).map(c => esc(c.name) + (c.rank?` #${c.rank}`:'')).join(', ') || '<span class="mut">none</span>';
-      const flags = (r.claim_flags||[]).map(c => `<div class="claim-flag">⚠ ${esc(c)}</div>`).join('');
-      const claims = (r.key_claims||[]).filter(c => !(r.claim_flags||[]).includes(c)).map(c => `<div style="margin:4px 0;font-size:12.5px">• ${esc(c)}</div>`).join('');
-      return `<div class="model-col">
-        <h4>${m.charAt(0).toUpperCase()+m.slice(1)}</h4>
-        <div style="margin-bottom:8px">
-          ${r.bs_mentioned ? `<span class="badge ok">mentioned${r.bs_rank?' #'+r.bs_rank:''}</span> <span class="${sentClass(r.bs_sentiment)}" style="font-size:12px">${r.bs_sentiment||''}</span>`
-                           : `<span class="badge miss">not mentioned</span>`}
-        </div>
-        ${r.bs_sentiment_reason ? `<div class="mut" style="font-size:12px;margin-bottom:8px">${esc(r.bs_sentiment_reason)}</div>` : ''}
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Response</div>
-        <div class="response-box">${esc(r.response_text||'')}</div>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Competitors named</div>
-        <div style="font-size:12.5px">${cmps}</div>
-        ${flags ? '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Flagged claims</div>'+flags : ''}
-        ${claims ? '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Key claims</div>'+claims : ''}
-      </div>`;
-    }).join('') + `</div>`;
+      if (!r) return '<div class="model-col"><h4>'+m+'</h4><p class="mut">no data</p></div>';
+      const cmps = (r.competitors||[]).map(c => esc(c.name) + (c.rank?' <span class="mut">#'+c.rank+'</span>':'')).join(', ') || '<span class="mut">none named</span>';
+      const flags = (r.claim_flags||[]).map(c => '<div class="claim-flag">\u26a0 '+esc(c)+'</div>').join('');
+      const claims = (r.key_claims||[]).filter(c => !(r.claim_flags||[]).includes(c)).map(c => '<div style="margin:4px 0;font-size:12.5px">\u2022 '+esc(c)+'</div>').join('');
+      return '<div class="model-col">'+
+        '<h4>'+m.charAt(0).toUpperCase()+m.slice(1)+'</h4>'+
+        '<div style="margin-bottom:8px">'+
+          (r.bs_mentioned ? '<span class="badge ok">mentioned'+(r.bs_rank?' #'+r.bs_rank:'')+'</span> <span class="'+sentClass(r.bs_sentiment)+'" style="font-size:12px">'+(r.bs_sentiment||'')+'</span>' : '<span class="badge miss">not mentioned</span>')+
+        '</div>'+
+        (r.bs_sentiment_reason ? '<div class="mut" style="font-size:12px;margin-bottom:8px;font-style:italic">'+esc(r.bs_sentiment_reason)+'</div>' : '')+
+        '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Full response</div>'+
+        '<div class="response-box">'+esc(r.response_text||'')+'</div>'+
+        '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Competitors named</div>'+
+        '<div style="font-size:12.5px">'+cmps+'</div>'+
+        (flags ? '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Flagged claims</div>'+flags : '')+
+        (claims ? '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:12px;margin-bottom:4px">Key claims</div>'+claims : '')+
+      '</div>';
+    }).join('') + '</div>';
   $('drawer').classList.add('show');
   $('drawer-bg').classList.add('show');
 }
 
-function renderComp(){
-  const rows = D.competitors || [];
-  mkChart('ch-comp', {type:'bar', data:{labels:rows.map(r=>r.k),
-    datasets:[{data:rows.map(r=>r.mentions), backgroundColor:'#3d5747', borderRadius:3}]},
-    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y',
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.x+' mentions'}}},
-      scales:{x:{beginAtZero:true, ticks:{color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}},
-              y:{ticks:{color:'#27231c', font:{size:12}}, grid:{display:false}}}}});
+/* ═════ DETAIL: COMPETITORS ═════ */
+function renderCompTable(){
+  const rows = D.core || [];
+  const counts = {};
+  const ranks = {};
+  rows.forEach(r => {
+    if (r.bs_mentioned){
+      counts['Barker & Stonehouse'] = (counts['Barker & Stonehouse']||0) + 1;
+      if (r.bs_rank){ ranks['Barker & Stonehouse'] = ranks['Barker & Stonehouse']||[]; ranks['Barker & Stonehouse'].push(r.bs_rank); }
+    }
+    (r.competitors||[]).forEach(c => {
+      if (!c.name) return;
+      const key = isBS(c.name) ? 'Barker & Stonehouse' : c.name.trim();
+      counts[key] = (counts[key]||0) + 1;
+      if (c.rank){ ranks[key] = ranks[key]||[]; ranks[key].push(c.rank); }
+    });
+  });
+  const total = Object.values(counts).reduce((a,b)=>a+b,0);
+  const list = Object.entries(counts).map(([k,v]) => ({
+    k, mentions: v,
+    sov: total ? v/total : 0,
+    avgRank: ranks[k] ? ranks[k].reduce((a,b)=>a+b,0)/ranks[k].length : null,
+    rankCount: ranks[k] ? ranks[k].length : 0
+  }));
+  const sk = sortState.compTab.key, sd = sortState.compTab.dir;
+  list.sort((a,b) => {
+    let av = a[sk], bv = b[sk];
+    if (av == null) av = sd==='asc' ? Infinity : -Infinity;
+    if (bv == null) bv = sd==='asc' ? Infinity : -Infinity;
+    return sd==='asc' ? av-bv : bv-av;
+  });
+  const arrow = k => sk===k ? (sd==='asc'?' asc':' desc') : '';
+
+  $('tbl-comp').innerHTML = list.length ? '<table><thead><tr>'+
+    '<th class="txt srt'+arrow('k')+'" data-sort="k">Brand</th>'+
+    '<th class="srt'+arrow('mentions')+'" data-sort="mentions">Mentions</th>'+
+    '<th class="srt'+arrow('sov')+'" data-sort="sov">Share of voice</th>'+
+    '<th class="srt'+arrow('avgRank')+'" data-sort="avgRank">Avg rank</th>'+
+    '<th>Ranked mentions</th>'+
+    '</tr></thead><tbody>' +
+    list.map(x => {
+      const bs = isBS(x.k);
+      return '<tr'+(bs?' style="background:#faf3e8"':'')+'>'+
+        '<td class="txt"><strong>'+esc(x.k)+'</strong>'+(bs?' <span class="badge bs">You</span>':'')+'</td>'+
+        '<td>'+x.mentions+'</td>'+
+        '<td>'+pct(x.sov)+'</td>'+
+        '<td>'+(x.avgRank ? x.avgRank.toFixed(1) : '<span class="mut">\u2013</span>')+'</td>'+
+        '<td>'+x.rankCount+'</td>'+
+      '</tr>';
+    }).join('') + '</tbody></table>' : '<div class="empty">No brand mentions yet</div>';
+
+  document.querySelectorAll('#tbl-comp th.srt').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.sort;
+    if (sortState.compTab.key === k) sortState.compTab.dir = sortState.compTab.dir==='asc'?'desc':'asc';
+    else { sortState.compTab.key = k; sortState.compTab.dir = k==='k'?'asc':'desc'; }
+    renderCompTable();
+  }));
 }
 
+/* ═════ DETAIL: CLAIMS ═════ */
 function renderClaims(){
-  const rows = D.claims || [];
-  if (!rows.length){ $('claims-body').innerHTML = '<div class="empty">No claims yet</div>'; return; }
-  $('claims-body').innerHTML = rows.map(r => `
-    <div style="border-bottom:1px solid var(--line);padding:12px 0">
-      ${r.flagged ? '<span class="badge" style="background:#f8e9e2;color:#a13d2d">FLAGGED</span> ' : ''}
-      <span class="mut" style="font-size:12px">${r.run_date} · ${r.model} · ${esc(r.prompt_id)}</span>
-      <div style="margin-top:4px;font-size:13px">${esc(r.claim)}</div>
-      <div class="mut" style="font-size:11.5px;margin-top:2px">prompt: ${esc(r.prompt_text)}</div>
-    </div>
-  `).join('');
+  const rows = D.core || [];
+  const items = [];
+  rows.forEach(r => {
+    (r.claim_flags||[]).forEach(c => items.push({flagged:true, run_date:r.run_date, model:r.model, prompt_id:r.prompt_id, prompt_text:r.prompt_text, claim:c}));
+    (r.key_claims||[]).filter(c => !(r.claim_flags||[]).includes(c)).forEach(c => items.push({flagged:false, run_date:r.run_date, model:r.model, prompt_id:r.prompt_id, prompt_text:r.prompt_text, claim:c}));
+  });
+  items.sort((a,b) => (b.flagged?1:0) - (a.flagged?1:0) || (b.run_date||'').localeCompare(a.run_date||''));
+  if (!items.length){ $('claims-body').innerHTML = '<div class="empty">No claims recorded yet</div>'; return; }
+  $('claims-body').innerHTML = items.slice(0, 300).map(r => (
+    '<div style="border-bottom:1px solid var(--line);padding:12px 0">'+
+      (r.flagged ? '<span class="badge" style="background:#f8e9e2;color:#a13d2d">FLAGGED</span> ' : '')+
+      '<span class="mut" style="font-size:12px">'+r.run_date+' \u00b7 '+r.model+' \u00b7 '+esc(r.prompt_id)+'</span>'+
+      '<div style="margin-top:4px;font-size:13px">'+esc(r.claim)+'</div>'+
+      '<div class="mut" style="font-size:11.5px;margin-top:2px">prompt: '+esc(r.prompt_text)+'</div>'+
+    '</div>'
+  )).join('');
+}
+
+/* ═════ DETAIL: GAPS ═════ */
+function renderGaps(){
+  const rows = D.core || [];
+  const byPrompt = {};
+  rows.forEach(r => {
+    if (!byPrompt[r.prompt_id]) byPrompt[r.prompt_id] = {id:r.prompt_id, text:r.prompt_text, category:r.category, anyMention:false};
+    if (r.bs_mentioned) byPrompt[r.prompt_id].anyMention = true;
+  });
+  const gaps = Object.values(byPrompt).filter(p => !p.anyMention);
+  gaps.sort((a,b) => (a.category||'').localeCompare(b.category||'') || (a.id||'').localeCompare(b.id||''));
+  if (!gaps.length){ $('tbl-gaps').innerHTML = '<div class="empty">B&amp;S was mentioned by at least one model on every prompt \u2014 no gaps in this run.</div>'; return; }
+  $('tbl-gaps').innerHTML = '<table><thead><tr><th class="txt">Prompt</th><th class="txt">Category</th><th class="txt">Prompt ID</th></tr></thead><tbody>'+
+    gaps.map(p => '<tr class="prompt-row" data-pid="'+esc(p.id)+'">'+
+      '<td class="txt">'+esc(p.text)+'</td>'+
+      '<td class="txt">'+(CAT_LABELS[p.category]||p.category)+'</td>'+
+      '<td class="txt"><code style="font-size:11.5px">'+esc(p.id)+'</code></td>'+
+    '</tr>').join('') + '</tbody></table>';
+  document.querySelectorAll('#tbl-gaps .prompt-row').forEach(tr => tr.addEventListener('click', () => openDrawer(tr.dataset.pid)));
 }
 
 /* ═══════ EVENTS ═══════ */
 $('run-btn').addEventListener('click', loadAll);
-['preset','model-sel','cat-sel'].forEach(id => $(id).addEventListener('change', () => { if (D.kpis) loadAll(); }));
-$('p-filter').addEventListener('input', e => { promptFilter = e.target.value; if (D.prompts) renderPrompts(); });
+['preset','model-sel','cat-sel'].forEach(id => $(id).addEventListener('change', () => { if (D.core) loadAll(); }));
+$('p-filter').addEventListener('input', e => { promptFilter = e.target.value; if (D.core) renderPromptsTable(); });
+
+document.querySelectorAll('.view-toggle button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.view-toggle button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  ['exec','detail','help'].forEach(v => $('view-'+v).style.display = 'none');
+  $('view-'+b.dataset.view).style.display = 'block';
+}));
 
 document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('nav.tabs button').forEach(x => x.classList.remove('on'));
   document.querySelectorAll('.tabs-panel').forEach(x => x.classList.remove('on'));
   b.classList.add('on');
-  $('pnl-' + b.dataset.tab).classList.add('on');
+  $('pnl-'+b.dataset.tab).classList.add('on');
 }));
 
 $('dr-close').addEventListener('click', () => { $('drawer').classList.remove('show'); $('drawer-bg').classList.remove('show'); });
 $('drawer-bg').addEventListener('click', () => { $('drawer').classList.remove('show'); $('drawer-bg').classList.remove('show'); });
 
 $('prompts-csv').addEventListener('click', () => {
-  const rows = D.prompts || [];
+  const rows = D.core || [];
   const csv = [['prompt_id','category','model','bs_mentioned','bs_rank','bs_sentiment','competitors','response_text']].concat(
     rows.map(r => [r.prompt_id, r.category, r.model, r.bs_mentioned, r.bs_rank, r.bs_sentiment, (r.competitors||[]).map(c=>c.name).join('|'), r.response_text])
   ).map(r => r.map(v => { v=v==null?'':String(v); return /[,"\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(',')).join('\r\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));
+  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));
   a.download = 'ai_visibility_prompts_'+iso(new Date())+'.csv'; a.click();
 });
 $('comp-csv').addEventListener('click', () => {
-  const rows = D.competitors || [];
-  const csv = ['competitor,mentions', ...rows.map(r=>r.k+','+r.mentions)].join('\r\n');
+  // Rebuild from D.core for consistency
+  const rows = D.core || [];
+  const counts = {};
+  rows.forEach(r => {
+    if (r.bs_mentioned) counts['Barker & Stonehouse'] = (counts['Barker & Stonehouse']||0)+1;
+    (r.competitors||[]).forEach(c => { if (!c.name) return; const k = isBS(c.name)?'Barker & Stonehouse':c.name.trim(); counts[k]=(counts[k]||0)+1; });
+  });
+  const csv = ['brand,mentions', ...Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>(/[,"]/.test(k)?'"'+k.replace(/"/g,'""')+'"':k)+','+v)].join('\r\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));
+  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));
   a.download = 'ai_visibility_competitors_'+iso(new Date())+'.csv'; a.click();
 });
 
 $('key-btn').addEventListener('click', () => {
-  $('key-state').textContent = hasGrant ? 'Signed in with Google' : 'Not signed in — click Run and sign in when prompted';
+  $('key-state').textContent = hasGrant ? 'Signed in with Google' : 'Not signed in \u2014 click Refresh data and sign in when prompted';
   $('modal-bg').classList.add('show');
 });
 $('key-cancel').addEventListener('click', () => $('modal-bg').classList.remove('show'));
@@ -778,8 +1056,8 @@ $('key-clear').addEventListener('click', () => { signOut(); $('key-state').textC
 
 /* ═══════ INIT ═══════ */
 (function init(){
-  if (hasGrant) showBanner('Click <strong>Run</strong> to load the latest AI visibility data.');
-  else showBanner('First run: click <strong>Run</strong> and sign in with your Google account.');
+  if (hasGrant) showBanner('Click <strong>Refresh data</strong> to load the latest run. Or start with <strong>Help &amp; guide</strong> if this is your first visit.');
+  else showBanner('First run: click <strong>Refresh data</strong> and sign in with your Google account when the popup appears.');
 })();
 </script>
 </body>
