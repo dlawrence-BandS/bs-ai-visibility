@@ -227,20 +227,28 @@ th.srt.desc:after{content:' \25bc';font-size:9px}
       <div>Click <strong>Refresh data</strong> to load the latest run.</div>
     </div>
 
+    <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;font-size:13px">
+      <div style="font-weight:600;color:var(--navy)">Scope:</div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="scope-include-brand"> Include brand-specific &amp; trust prompts
+      </label>
+      <div class="mut" style="font-size:12px;margin-left:auto"><em>By default, brand+trust prompts are excluded from this view because they always mention B&amp;S by design and flatter every metric. Tick the box to include them if you're specifically checking those categories.</em></div>
+    </div>
+
     <div class="kpis">
       <div class="kpi big" style="--kc:var(--m-mention)">
-        <div class="info">?<span class="tt"><strong>Mention rate</strong> is the % of prompts where AI named Barker &amp; Stonehouse directly. Includes brand and trust prompts (where B&amp;S is asked about by name), so headline figure will be flattered. See <em>non-brand mention rate</em> below for the fairer test.</span></div>
-        <div class="kl"><span class="dot"></span>Overall mention rate</div>
+        <div class="info">?<span class="tt"><strong>Mention rate</strong> for the scoped prompts &mdash; by default this excludes brand-specific and trust prompts (which always name B&amp;S and would flatter the number). Tick <em>Include brand prompts</em> above if you want the flattered view.</span></div>
+        <div class="kl"><span class="dot"></span>Mention rate <span id="scope-badge" class="mut" style="font-size:10px;font-weight:500;letter-spacing:.3px;margin-left:6px"></span></div>
         <div class="kv" id="kv-mention">&ndash;</div>
         <div class="kd" id="kd-mention"></div>
-        <div class="kh">Of all AI answers, how often B&amp;S was named at all.</div>
+        <div class="kh">How often B&amp;S is named in fair, non-brand questions.</div>
       </div>
       <div class="kpi big" style="--kc:var(--m-non)">
-        <div class="info">?<span class="tt"><strong>Non-brand mention rate</strong> excludes brand and trust prompts. This is the <strong>fair visibility test</strong>: when a customer asks a generic question (best sofa brands, alternatives to DFS, where to buy an oak dining table), how often does AI think of B&amp;S? This is the KPI to track over time.</span></div>
+        <div class="info">?<span class="tt"><strong>Non-brand mention rate</strong> always excludes brand and trust prompts, regardless of the scope toggle above. This is the <strong>fair visibility test</strong>: when a customer asks a generic question, how often does AI think of B&amp;S? Track this over time.</span></div>
         <div class="kl"><span class="dot"></span>Non-brand mention rate</div>
         <div class="kv" id="kv-non">&ndash;</div>
         <div class="kd" id="kd-non"></div>
-        <div class="kh">The fair test &mdash; excludes questions naming B&amp;S.</div>
+        <div class="kh">Always excludes prompts that name B&amp;S. The strategic KPI.</div>
       </div>
       <div class="kpi big" style="--kc:var(--m-sov)">
         <div class="info">?<span class="tt"><strong>Share of voice</strong> is B&amp;S's slice of all brand mentions in AI answers. If AI named 100 furniture brands total and B&amp;S was 8 of them, SoV is 8%.</span></div>
@@ -267,7 +275,7 @@ th.srt.desc:after{content:' \25bc';font-size:9px}
     <div class="grid2">
       <div class="card">
         <h3>Share of voice: top brands</h3>
-        <div class="hint">Who AI mentions most often across the whole prompt corpus. <strong>B&amp;S is highlighted.</strong> Aim to climb this leaderboard over time.</div>
+        <div class="hint">Who AI mentions most often across your <strong>current scoped view</strong>. <strong>B&amp;S is highlighted.</strong> Aim to climb this leaderboard over time. Below shows brand-specific/trust prompts excluded by default &mdash; toggle above to include.</div>
         <div class="chart-h" style="height:380px"><canvas id="ch-sov"></canvas></div>
       </div>
       <div class="card">
@@ -355,13 +363,15 @@ th.srt.desc:after{content:' \25bc';font-size:9px}
     <div class="card">
       <h3>Which numbers should I watch?</h3>
       <div class="help-block">
-        <h4>The five headline KPIs</h4>
+        <h4>Default scope: non-brand prompts only</h4>
+        <p>By default the executive view <strong>excludes brand-specific and trust prompts</strong>. Why: those prompts contain the phrase "Barker &amp; Stonehouse" in the question itself, so AI names us in 95%+ of them &mdash; that flatters mention rate and share-of-voice without telling you anything you don't already know. The default scope shows only <em>discovery</em>, <em>competitor</em> and <em>product</em> prompts, which is the fair test of whether AI thinks of B&amp;S unprompted.</p>
+        <p>Tick <em>Include brand prompts</em> at the top of the exec view if you specifically want to check how AI is responding to brand or trust questions (e.g. sentiment on "Barker and Stonehouse complaints" &mdash; that's the trust-category use case).</p>
+        <h4>The four headline KPIs</h4>
         <ul>
-          <li><strong>Overall mention rate</strong> &mdash; broadest measure, but includes brand and trust prompts (where B&amp;S is asked about by name). Good for a headline but flattered by definition.</li>
-          <li><strong>Non-brand mention rate</strong> &mdash; the fair test. Excludes brand/trust prompts, leaving discovery + competitor + product. If AI is genuinely thinking of B&amp;S when customers don't already know the name, this number moves.</li>
-          <li><strong>Share of voice</strong> &mdash; B&amp;S's slice of all furniture brand mentions AI made. If AI named 100 brands and 8 were B&amp;S, SoV is 8%. Compare against known market leaders like DFS/John Lewis.</li>
+          <li><strong>Mention rate</strong> (scope-aware) &mdash; % of prompts in the current scope where AI named B&amp;S. Reflects the toggle.</li>
+          <li><strong>Non-brand mention rate</strong> &mdash; always excludes brand/trust regardless of toggle. This is the strategic KPI to track over time.</li>
+          <li><strong>Share of voice</strong> &mdash; B&amp;S's slice of all furniture-brand mentions AI made in the current scope. Compare against known market leaders like DFS/John Lewis.</li>
           <li><strong>Positive sentiment</strong> &mdash; when B&amp;S <em>is</em> mentioned, how favourably. Above 70% is healthy for premium retail.</li>
-          <li><strong>Avg rank when mentioned</strong> &mdash; if AI gives a numbered list, where does B&amp;S land? #1&ndash;3 is prime real estate.</li>
         </ul>
         <h4>What "good" looks like</h4>
         <p>Baseline benchmarks for a regional premium retailer:</p>
@@ -369,7 +379,7 @@ th.srt.desc:after{content:' \25bc';font-size:9px}
           <li>Non-brand mention rate 30&ndash;50% &mdash; solid; below 20% suggests a discoverability problem</li>
           <li>Share of voice 5&ndash;10% &mdash; strong for a regional player; DFS/John Lewis will likely be 15&ndash;25%</li>
           <li>Positive sentiment 70&ndash;85% &mdash; healthy; below 60% needs investigation</li>
-          <li>Avg rank 2&ndash;4 &mdash; you're in the consideration set</li>
+          <li>Avg rank 2&ndash;4 (visible in the competitor deep-dive) &mdash; you're in the consideration set</li>
         </ul>
       </div>
     </div>
@@ -460,8 +470,18 @@ document.getElementById('ft-ds').textContent = PROJECT + '.' + DATASET;
 
 // Brand/trust categories are excluded from "non-brand" mention rate
 const NON_BRAND_CATS = ['discovery','competitor','product'];
+const BRAND_CATS = ['brand','trust'];
 const CAT_LABELS = {discovery:'Discovery', brand:'Brand-specific', competitor:'Competitor', product:'Product', trust:'Trust'};
 const MODEL_COLORS = {chatgpt:'#a8814f', claude:'#3d5747', gemini:'#5b7085'};
+
+// Executive view: exclude brand-specific + trust prompts by default (they skew SoV and mention rate).
+// The user can toggle this on via the "Include brand prompts" checkbox.
+let execIncludesBrand = false;
+function execRows(){
+  const all = D.core || [];
+  if (execIncludesBrand) return all;
+  return all.filter(r => !BRAND_CATS.includes(r.category));
+}
 
 /* ═══════ STATE ═══════ */
 let accessToken = null, tokenExpiry = 0;
@@ -670,20 +690,22 @@ function renderAll(){
   renderGaps();
   const latest = D.core.length ? [...new Set(D.core.map(r=>r.run_date))].sort().pop() : null;
   $('fresh-pill').textContent = 'Latest run: ' + (latest || '\u2013');
-  $('mention-pill').textContent = 'Mention rate: ' + (D.mrate!=null ? pct(D.mrate) : '\u2013');
+  $('mention-pill').textContent = 'Non-brand mention: ' + (D.nonRate!=null ? pct(D.nonRate) : '\u2013');
 }
 
 function computeKPIs(){
-  const rows = D.core || [];
+  const rows = execRows();
+  const allRows = D.core || [];
   const total = rows.length;
   const mentioned = rows.filter(r=>r.bs_mentioned).length;
   D.mrate = total ? mentioned/total : null;
 
-  const nonBrand = rows.filter(r => NON_BRAND_CATS.includes(r.category));
+  // Non-brand rate is always computed against non-brand cats regardless of exec toggle
+  const nonBrand = allRows.filter(r => NON_BRAND_CATS.includes(r.category));
   const nonBrandMentioned = nonBrand.filter(r=>r.bs_mentioned).length;
   D.nonRate = nonBrand.length ? nonBrandMentioned/nonBrand.length : null;
 
-  // Share of voice: B&S mentions / total brand mentions (across all prompts in scope)
+  // Share of voice: B&S mentions / total brand mentions in the scoped rows
   let bsCount = 0, totalCount = 0;
   rows.forEach(r => {
     if (r.bs_mentioned) bsCount++;
@@ -715,6 +737,7 @@ function renderExecSummary(){
     $('exec-summary').innerHTML = '<div class="lead">No data yet</div><div>Run the workflow at least once, then click Refresh data.</div>';
     return;
   }
+  const scope = execIncludesBrand ? 'all prompts' : '<strong>non-brand prompts only</strong> (excluding questions that name B&amp;S directly)';
   const nonPct = D.nonRate!=null ? pct(D.nonRate) : '\u2013';
   const sovPct = D.sov!=null ? pct(D.sov) : '\u2013';
   const posPct = D.posRate!=null ? pct(D.posRate) : '\u2013';
@@ -730,11 +753,13 @@ function renderExecSummary(){
 
   $('exec-summary').innerHTML =
     '<div class="lead">AI names B&amp;S in <strong>'+nonPct+'</strong> of relevant (non-brand) customer questions</div>'+
-    '<div>Across '+D.responseCount+' AI responses this run, Barker &amp; Stonehouse held <strong>'+sovPct+' share of voice</strong> against all named furniture retailers. Where B&amp;S is mentioned, AI describes the brand favourably <strong>'+posPct+'</strong> of the time &mdash; '+sentVerdict+'. The non-brand mention rate is '+nonVerdict+'.</div>';
+    '<div>Scoped to '+scope+'. B&amp;S holds <strong>'+sovPct+' share of voice</strong> against all named furniture retailers, and where mentioned, AI describes the brand favourably <strong>'+posPct+'</strong> of the time &mdash; '+sentVerdict+'. The non-brand mention rate is '+nonVerdict+'.</div>';
 }
 
 function renderKPIs(){
   const set=(k,v,d)=>{ $('kv-'+k).textContent = v; $('kd-'+k).innerHTML = d; };
+  const scopeLabel = execIncludesBrand ? '(all prompts)' : '(non-brand scope)';
+  $('scope-badge').textContent = scopeLabel;
   set('mention', pct(D.mrate), D.mentionCount+' / '+D.responseCount+' responses');
   set('non', pct(D.nonRate), D.nonBrandMentions+' / '+D.nonBrandCount+' non-brand responses');
   set('sov', pct(D.sov), D.bsBrandCount+' of '+D.allBrandCount+' brand mentions');
@@ -742,32 +767,30 @@ function renderKPIs(){
 }
 
 function renderCategoryChart(){
-  const rows = D.core || [];
+  const rows = D.core || [];   // always show all categories in the breakdown chart
   const cats = ['discovery','competitor','product','brand','trust'];
   const data = cats.map(c => {
     const r = rows.filter(x => x.category===c);
     return r.length ? r.filter(x=>x.bs_mentioned).length / r.length : 0;
   });
-  mkChart('ch-cat', {type:'bar', data:{labels:cats.map(c=>CAT_LABELS[c]),
-    datasets:[{data, backgroundColor:cats.map(c => NON_BRAND_CATS.includes(c) ? '#a8814f' : '#c9bfa8'), borderRadius:3}]},
+  mkChart('ch-cat', {type:'bar', data:{labels:cats.map(c => CAT_LABELS[c] + (NON_BRAND_CATS.includes(c) ? '' : '  (excluded from KPIs)')),
+    datasets:[{data, backgroundColor:cats.map(c => NON_BRAND_CATS.includes(c) ? '#a8814f' : '#d8ccb4'), borderRadius:3}]},
     options:{responsive:true, maintainAspectRatio:false, indexAxis:'y',
       plugins:{legend:{display:false}, tooltip:{callbacks:{
         label:c=>'Mention rate: '+pct(c.parsed.x),
-        afterLabel:c=>NON_BRAND_CATS.includes(cats[c.dataIndex]) ? '' : '(brand/trust categories included \u2014 flattered by design)'
+        afterLabel:c=>NON_BRAND_CATS.includes(cats[c.dataIndex]) ? 'Counted in headline KPIs' : 'Excluded by default (brand/trust always mentions B&S)'
       }}},
       scales:{x:{beginAtZero:true, max:1, ticks:{callback:v=>pct(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}},
               y:{ticks:{color:'#27231c', font:{size:12}}, grid:{display:false}}}}});
 }
 
 function renderSoV(){
-  // Aggregate all brand mentions (competitors + B&S) into one ranked list
-  const rows = D.core || [];
+  const rows = execRows();
   const counts = {};
   rows.forEach(r => {
     if (r.bs_mentioned) counts['Barker & Stonehouse'] = (counts['Barker & Stonehouse']||0) + 1;
     (r.competitors||[]).forEach(c => {
       if (!c.name) return;
-      // Normalise name — Title Case, strip duplicates
       const n = c.name.trim();
       if (isBS(n)) counts['Barker & Stonehouse'] = (counts['Barker & Stonehouse']||0) + 1;
       else counts[n] = (counts[n]||0) + 1;
@@ -787,7 +810,7 @@ function renderSoV(){
 }
 
 function renderSent(){
-  const rows = (D.core||[]).filter(r=>r.bs_mentioned);
+  const rows = execRows().filter(r=>r.bs_mentioned);
   const counts = {positive:0, neutral:0, mixed:0, negative:0};
   rows.forEach(r => { if (counts[r.bs_sentiment]!==undefined) counts[r.bs_sentiment]++; });
   mkChart('ch-sent', {type:'doughnut', data:{labels:['Positive','Neutral','Mixed','Negative'],
@@ -1005,6 +1028,10 @@ function renderGaps(){
 $('run-btn').addEventListener('click', loadAll);
 ['preset','model-sel','cat-sel'].forEach(id => $(id).addEventListener('change', () => { if (D.core) loadAll(); }));
 $('p-filter').addEventListener('input', e => { promptFilter = e.target.value; if (D.core) renderPromptsTable(); });
+$('scope-include-brand').addEventListener('change', e => {
+  execIncludesBrand = e.target.checked;
+  if (D.core) renderAll();
+});
 
 document.querySelectorAll('.view-toggle button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.view-toggle button').forEach(x => x.classList.remove('on'));
